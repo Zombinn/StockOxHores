@@ -1,4 +1,4 @@
-stock_data.duckdb
+stock_data.duckdb*
 *.pyc
 __pycache__/
 .DS_Store
