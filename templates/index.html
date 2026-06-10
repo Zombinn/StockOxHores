@@ -111,8 +111,8 @@ tailwind.config = {
     </div>
 
     <div class="px-4 py-2 border-t border-zinc-800/50 text-[10px] text-zinc-600 flex justify-between font-mono">
-      <span>N <span x-text="stats.news_records || 0"></span></span>
-      <span>M <span x-text="stats.macro_records || 0"></span></span>
+      <span>新闻 <span x-text="stats.news_records || 0"></span></span>
+      <span>宏观 <span x-text="stats.macro_records || 0"></span></span>
       <span class="text-acc/60" x-text="lastUpdated"></span>
     </div>
   </div>
@@ -328,9 +328,9 @@ tailwind.config = {
     <!-- Floating bar -->
     <div class="fixed bottom-0 left-[200px] right-0 bg-zinc-900/80 backdrop-blur border-t border-zinc-800/50 px-5 py-[6px] text-[10px] text-zinc-600 flex items-center gap-4 z-10 font-mono">
       <span class="inline-block w-1.5 h-1.5 rounded-full bg-rise/60 mr-1 align-middle"></span>
-      <span class="font-mono text-[11px]">P <span x-text="stats.price_records || 0"></span></span>
-      <span class="font-mono text-[11px]">N <span x-text="stats.news_records || 0"></span></span>
-      <span class="font-mono text-[11px]">M <span x-text="stats.macro_records || 0"></span></span>
+      <span class="font-mono text-[11px]">行情 <span x-text="stats.price_records || 0"></span></span>
+      <span class="font-mono text-[11px]">新闻 <span x-text="stats.news_records || 0"></span></span>
+      <span class="font-mono text-[11px]">宏观 <span x-text="stats.macro_records || 0"></span></span>
       <span class="flex-1"></span>
       <span x-text="dbStatus" class="text-acc/70"></span>
     </div>
