@@ -237,7 +237,7 @@ async def get_macro(
 async def get_logs(limit: int = Query(100, alias="limit")):
     conn = get_conn()
     rows = conn.execute(
-        """SELECT run_date, module, ts_code, status, records, message, duration_s, id
+        """SELECT run_date, module, ts_code, status, records, message, duration_s
            FROM run_log
            ORDER BY created_at DESC
            LIMIT ?""",
@@ -245,7 +245,6 @@ async def get_logs(limit: int = Query(100, alias="limit")):
     ).fetchall()
     return [
         {
-            "id": r[7],
             "run_date": str(r[0]),
             "module": r[1],
             "ts_code": r[2],
@@ -256,6 +255,26 @@ async def get_logs(limit: int = Query(100, alias="limit")):
         }
         for r in rows
     ]
+
+
+# ─── API: 情感分析 ───
+
+@app.get("/api/analysis/sentiment-summary")
+async def get_sentiment_summary(days: int = Query(7, alias="days")):
+    from analysis.correlation import sentiment_summary
+    return sentiment_summary(days=days)
+
+
+@app.get("/api/analysis/day/{date_str}")
+async def get_day_analysis(date_str: str):
+    from analysis.correlation import day_correlation
+    return day_correlation(date_str)
+
+
+@app.get("/api/analysis/stock/{ts_code}")
+async def get_stock_analysis(ts_code: str, days: int = Query(30, alias="days")):
+    from analysis.correlation import stock_correlation
+    return stock_correlation(ts_code, days=days)
 
 
 if __name__ == "__main__":
