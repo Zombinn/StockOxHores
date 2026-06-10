@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StockOxHores</title>
+<title>StockOxHores · 信息匹配</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
@@ -29,52 +29,34 @@ tailwind.config = {
   ::-webkit-scrollbar-track { background: #0a0a0c; }
   ::-webkit-scrollbar-thumb { background: #2f2f35; border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: #52525b; }
-  .font-mono { font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; }
 
-  /* Sidebar */
   .sb { width: 200px; min-width: 200px; background: #141417; border-right: 1px solid #1f1f24; overflow-y: auto; display: flex; flex-direction: column; }
   .sb-item { cursor: pointer; padding: 6px 14px; border-bottom: 1px solid #1a1a1f; transition: all .1s; display: flex; align-items: center; gap: 8px; }
   .sb-item:hover { background: #1f1f24; }
   .sb-item.active { background: #08303a; border-left: 2px solid #22d3ee; }
-  .sb-item .dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
 
-  /* Table */
-  .tbl { width: 100%; border-collapse: collapse; }
-  .tbl th { text-align: left; padding: 6px 10px; font-size: 10px; font-weight: 500; color: #52525b; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid #1f1f24; font-family: Inter, sans-serif; }
-  .tbl td { padding: 5px 10px; border-bottom: 1px solid #141417; font-size: 12px; font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; white-space: nowrap; }
-  .tbl tr:hover td { background: #141417; }
-
-  /* Mini bar chart */
-  .bar { width: 100%; height: 40px; display: flex; align-items: flex-end; gap: 1px; }
-  .bar-seg { flex: 1; border-radius: 1px 1px 0 0; min-height: 2px; transition: height .2s; }
-
-  /* Tabs */
   .tab { cursor: pointer; padding: 6px 14px; font-size: 12px; color: #52525b; border-bottom: 1.5px solid transparent; transition: all .12s; white-space: nowrap; }
   .tab:hover { color: #a1a1aa; }
   .tab.active { color: #22d3ee; border-bottom-color: #22d3ee; }
 
-  /* Status badge */
-  .badge { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 500; letter-spacing: .02em; }
-
-  /* Search input */
-  .sinp { background: #1a1a1f; border: 1px solid #27272c; border-radius: 4px; padding: 4px 10px; font-size: 12px; color: #d4d4d8; outline: none; width: 100%; }
+  .sinp { background: #1a1a1f; border: 1px solid #27272c; border-radius: 4px; padding: 4px 10px; font-size: 12px; color: #d4d4d8; outline: none; }
   .sinp:focus { border-color: #0891b2; }
   .sinp::placeholder { color: #52525b; }
 
-  /* Sparkline inline */
-  .spark { display: inline-flex; align-items: center; gap: 4px; }
-  .spark-val { font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; font-size: 12px; }
-
-  /* News item */
-  .nitem { padding: 6px 0; border-bottom: 1px solid #141417; }
+  .nitem { padding: 8px 0; border-bottom: 1px solid #141417; }
   .nitem:last-child { border-bottom: none; }
-  .nitem a { color: #d4d4d8; text-decoration: none; font-size: 12px; line-height: 1.4; }
+  .nitem a { color: #d4d4d8; text-decoration: none; font-size: 13px; line-height: 1.4; }
   .nitem a:hover { color: #22d3ee; }
 
-  /* Grid stat card */
-  .stat { padding: 10px 14px; }
-  .stat-num { font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; font-size: 22px; font-weight: 500; line-height: 1.1; }
-  .stat-lbl { font-size: 11px; color: #52525b; margin-bottom: 2px; }
+  .badge { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 500; }
+
+  /* Timeline */
+  .tl { position: relative; padding-left: 24px; }
+  .tl::before { content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 1px; background: #27272c; }
+  .tl-item { position: relative; padding-bottom: 12px; }
+  .tl-dot { position: absolute; left: -20px; top: 4px; width: 8px; height: 8px; border-radius: 50%; border: 2px solid; }
+  .tl-time { font-size: 10px; color: #52525b; font-family: 'JetBrains Mono', monospace; margin-bottom: 2px; }
 </style>
 </head>
 <body>
@@ -85,35 +67,30 @@ tailwind.config = {
   <div class="sb">
     <div class="px-4 py-3 border-b border-zinc-800/50">
       <div class="flex items-center gap-2">
-        <span class="text-acc text-lg leading-none">⌘</span>
+        <span class="text-acc text-lg leading-none">⊕</span>
         <span class="text-sm font-semibold text-zinc-100 tracking-tight">StockOx</span>
       </div>
-      <div class="text-[10px] text-zinc-600 mt-1 font-mono">
-        <span x-text="stats.stocks"></span> · <span x-text="stats.price_records"></span> bars
-      </div>
+      <div class="text-[10px] text-zinc-600 mt-1 mono"><span x-text="stats.stocks"></span> 标的 · <span x-text="stats.news_records || 0"></span> 条新闻</div>
     </div>
 
     <div class="px-3 py-2">
-      <input type="text" x-model="searchQuery" @input="filterStocks()"
-             placeholder="代码 / 名称" class="sinp">
+      <input type="text" x-model="searchQuery" @input="filterStocks()" placeholder="搜索股票" class="sinp w-full">
     </div>
 
     <div class="flex-1 overflow-y-auto">
       <template x-for="s in filteredStocks" :key="s">
-        <div class="sb-item" :class="{ active: selectedStock === s }" @click="selectStock(s)">
-          <span class="dot" :class="(stockChange(s)||0) >= 0 ? 'bg-rise' : 'bg-fall'"></span>
-          <span class="font-mono text-xs flex-1" x-text="s"></span>
-          <span class="font-mono text-[11px]" :class="(stockChange(s)||0) >= 0 ? 'text-rise' : 'text-fall'"
-                x-text="stockChangeFmt(s)"></span>
+        <div class="sb-item" :class="{ active: view === 'stock' && selectedStock === s }" @click="selectStock(s)">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="hasNews(s) ? 'bg-acc/60' : 'bg-zinc-700'"></span>
+          <span class="mono text-xs flex-1" x-text="s"></span>
+          <span class="text-[10px] text-zinc-600 mono" x-text="newsCount(s)"></span>
         </div>
       </template>
       <div x-show="filteredStocks.length === 0" class="p-4 text-zinc-600 text-[11px] text-center">无匹配</div>
     </div>
 
-    <div class="px-4 py-2 border-t border-zinc-800/50 text-[10px] text-zinc-600 flex justify-between font-mono">
+    <div class="px-4 py-2 border-t border-zinc-800/50 text-[10px] text-zinc-600 flex justify-between mono">
       <span>新闻 <span x-text="stats.news_records || 0"></span></span>
       <span>宏观 <span x-text="stats.macro_records || 0"></span></span>
-      <span class="text-acc/60" x-text="lastUpdated"></span>
     </div>
   </div>
 
@@ -122,203 +99,178 @@ tailwind.config = {
 
     <!-- Top bar -->
     <div class="flex items-center px-5 pt-2 pb-0 border-b border-zinc-800/30 bg-zinc-950 flex-shrink-0 gap-4">
-      <template x-for="tab in tabs" :key="tab.id">
-        <div class="tab" :class="{ active: activeTab === tab.id }" @click="activeTab = tab.id; loadTab()" x-text="tab.label"></div>
+      <template x-for="t in tabs" :key="t.id">
+        <div class="tab" :class="{ active: view === t.id }" @click="view = t.id; loadView()" x-text="t.label"></div>
       </template>
       <div class="flex-1"></div>
-      <div class="text-[10px] text-zinc-600 font-mono tracking-tight">
-        <span class="inline-block w-2 h-2 rounded-full bg-rise/60 mr-1 align-middle"></span>
-        <span class="align-middle" x-text="dbStatus"></span>
+      <div class="text-[10px] text-zinc-600 mono flex items-center gap-1">
+        <span class="inline-block w-1.5 h-1.5 rounded-full bg-rise/60"></span>
+        <span x-text="dbStatus"></span>
       </div>
     </div>
 
     <!-- Content -->
-    <div class="flex-1 overflow-y-auto px-5 py-4 space-y-5" style="padding-bottom: 44px;">
+    <div class="flex-1 overflow-y-auto px-5 py-4" style="padding-bottom: 44px;">
 
-      <!-- ============ DASHBOARD ============ -->
-      <template x-if="activeTab === 'dashboard'">
-        <div>
+      <!-- ===== 今 TODAY ===== -->
+      <template x-if="view === 'today'">
+        <div class="max-w-3xl">
+          <div class="text-sm font-medium text-zinc-300 mb-4">今日情报 · <span class="mono text-zinc-500" x-text="todayStr"></span></div>
+
+          <!-- Stats row -->
           <div class="grid grid-cols-4 gap-px bg-zinc-800/20 rounded overflow-hidden mb-5">
-            <div class="stat bg-zinc-900/60"><div class="stat-lbl">股票</div><div class="stat-num text-zinc-100" x-text="stats.stocks || '—'"></div></div>
-            <div class="stat bg-zinc-900/60"><div class="stat-lbl">行情</div><div class="stat-num text-zinc-100" x-text="stats.price_records || '—'"></div></div>
-            <div class="stat bg-zinc-900/60"><div class="stat-lbl">新闻</div><div class="stat-num text-acc" x-text="stats.news_records || '—'"></div></div>
-            <div class="stat bg-zinc-900/60"><div class="stat-lbl">宏观</div><div class="stat-num text-zinc-100" x-text="stats.macro_records || '—'"></div></div>
+            <div class="p-3 bg-zinc-900/60"><div class="text-[10px] text-zinc-600 uppercase tracking-wider">监控标的</div><div class="mono text-lg text-zinc-100 mt-0.5" x-text="stats.stocks || '—'"></div></div>
+            <div class="p-3 bg-zinc-900/60"><div class="text-[10px] text-zinc-600 uppercase tracking-wider">今日新闻</div><div class="mono text-lg text-acc mt-0.5" x-text="todayNewsCount"></div></div>
+            <div class="p-3 bg-zinc-900/60"><div class="text-[10px] text-zinc-600 uppercase tracking-wider">宏观快讯</div><div class="mono text-lg text-zinc-100 mt-0.5" x-text="todayMacroCount"></div></div>
+            <div class="p-3 bg-zinc-900/60"><div class="text-[10px] text-zinc-600 uppercase tracking-wider">有新闻标的</div><div class="mono text-lg text-zinc-100 mt-0.5" x-text="activeStockCount"></div></div>
           </div>
 
-          <div class="grid grid-cols-5 gap-px bg-zinc-800/20 rounded overflow-hidden">
-            <div class="col-span-2 p-4 bg-zinc-900/60">
-              <div class="text-[11px] font-medium text-zinc-400 mb-2 uppercase tracking-wider">今日摘要</div>
-              <div x-show="latestSummary" class="text-xs text-zinc-500 leading-relaxed whitespace-pre-wrap font-mono" x-text="latestSummary"></div>
-              <div x-show="!latestSummary" class="text-xs text-zinc-600">暂无数据</div>
-            </div>
-            <div class="col-span-3 p-4 bg-zinc-900/60">
-              <div class="text-[11px] font-medium text-zinc-400 mb-2 uppercase tracking-wider">涨跌 TOP5</div>
-              <table class="tbl" x-show="topMovers.length">
-                <thead><tr><th>股票</th><th class="text-right">收盘</th><th class="text-right">涨跌</th><th class="text-right">成交量</th></tr></thead>
-                <tbody>
-                  <template x-for="r in topMovers" :key="r.ts_code">
-                    <tr @click="selectStock(r.ts_code); activeTab='stock'" class="cursor-pointer">
-                      <td class="font-mono text-zinc-300 text-xs" x-text="r.ts_code"></td>
-                      <td class="text-right" x-text="r.close.toFixed(2)"></td>
-                      <td class="text-right font-semibold" :class="r.change_pct >= 0 ? 'text-rise' : 'text-fall'"
-                          x-text="(r.change_pct >= 0 ? '+' : '') + r.change_pct.toFixed(2) + '%'"></td>
-                      <td class="text-right text-zinc-500" x-text="r.vol ? (r.vol/10000).toFixed(0)+'万' : '—'"></td>
-                    </tr>
+          <!-- Today's news by stock -->
+          <div x-show="todayNews.length">
+            <div class="text-[11px] text-zinc-400 uppercase tracking-wider mb-2 font-medium">个股新闻</div>
+            <template x-for="(news, code) in todayByStock" :key="code">
+              <div class="mb-4">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-acc/60"></span>
+                  <span class="mono text-xs text-zinc-300 font-medium" x-text="code"></span>
+                  <span class="text-[10px] text-zinc-600" x-text="news.length + ' 条'"></span>
+                </div>
+                <div class="ml-4 space-y-1">
+                  <template x-for="n in news.slice(0, 5)" :key="n.title">
+                    <div class="text-xs text-zinc-400 hover:text-zinc-200 cursor-pointer leading-relaxed"
+                         @click="selectedStock = code; view='stock'; loadStockNews()">
+                      <span class="text-[10px] text-zinc-600 mono mr-1" x-text="n.source"></span>
+                      <span x-text="n.title"></span>
+                    </div>
                   </template>
-                </tbody>
-              </table>
-              <div x-show="!topMovers.length" class="text-xs text-zinc-600">无数据</div>
-            </div>
-          </div>
-        </div>
-      </template>
-
-      <!-- ============ STOCK ============ -->
-      <template x-if="activeTab === 'stock'">
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <div class="text-base font-semibold text-zinc-100 font-mono tracking-tight" x-text="selectedStock || '选择股票'"></div>
-            <select x-model="chartDays" @change="loadStockDetail()"
-                    class="bg-zinc-800 border border-zinc-700 rounded text-[11px] px-2 py-1 text-zinc-400 font-mono outline-none focus:border-acc/50">
-              <option value="5">5d</option><option value="20">20d</option><option value="60" selected>60d</option>
-              <option value="120">120d</option><option value="250">1y</option>
-            </select>
+                </div>
+              </div>
+            </template>
           </div>
 
-          <!-- Mini sparkline bars -->
-          <div class="bg-zinc-900/40 rounded p-3 mb-4" x-show="stockDetail.length">
-            <div class="flex justify-between text-[10px] text-zinc-600 mb-1">
-              <span>涨跌幅</span>
-              <span class="font-mono" x-text="stockDetail.length + ' bars'"></span>
-            </div>
-            <div class="bar">
-              <template x-for="r in stockDetail" :key="r.trade_date">
-                <div class="bar-seg" :style="'height:' + Math.max(Math.abs(r.change_pct||0)*2.5, 2) + 'px; max-height:38px'"
-                     :class="(r.change_pct||0) >= 0 ? 'bg-rise/60' : 'bg-fall/60'"
-                     :title="r.trade_date + ' ' + (r.change_pct||0).toFixed(2) + '%'">
+          <!-- Today's macro -->
+          <div x-show="todayMacro.length" class="mt-5">
+            <div class="text-[11px] text-zinc-400 uppercase tracking-wider mb-2 font-medium">宏观快讯</div>
+            <div class="tl">
+              <template x-for="e in todayMacro.slice(0, 10)" :key="e.id || e.title">
+                <div class="tl-item">
+                  <div class="tl-dot" :class="e.importance >= 4 ? 'border-fall' : e.importance === 3 ? 'border-amber-500' : 'border-zinc-600'"></div>
+                  <div class="tl-time" x-text="e.event_time || e.event_date"></div>
+                  <div class="text-xs text-zinc-300 leading-relaxed" x-text="e.title"></div>
+                  <div x-show="e.content" class="text-[11px] text-zinc-600 mt-0.5 line-clamp-2" x-text="e.content"></div>
                 </div>
               </template>
             </div>
           </div>
 
-          <!-- Price table -->
-          <div class="overflow-x-auto">
-            <table class="tbl">
-              <thead><tr><th>日期</th><th class="text-right">开盘</th><th class="text-right">收盘</th><th class="text-right">最高</th><th class="text-right">最低</th><th class="text-right">涨跌</th><th class="text-right">成交量</th></tr></thead>
-              <tbody>
-                <template x-for="r in stockDetail.slice(0, 120)" :key="r.trade_date">
-                  <tr>
-                    <td class="text-zinc-500 text-[11px]" x-text="r.trade_date"></td>
-                    <td class="text-right" x-text="r.open?.toFixed(2) || '—'"></td>
-                    <td class="text-right font-medium text-zinc-200" x-text="r.close?.toFixed(2) || '—'"></td>
-                    <td class="text-right text-zinc-400" x-text="r.high?.toFixed(2) || '—'"></td>
-                    <td class="text-right text-zinc-400" x-text="r.low?.toFixed(2) || '—'"></td>
-                    <td class="text-right font-semibold" :class="(r.change_pct||0) >= 0 ? 'text-rise' : 'text-fall'"
-                        x-text="(r.change_pct >= 0 ? '+' : '') + r.change_pct?.toFixed(2) + '%'"></td>
-                    <td class="text-right text-zinc-500" x-text="r.vol ? (r.vol/10000).toFixed(0)+'万' : '—'"></td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
+          <div x-show="!todayNews.length && !todayMacro.length" class="text-xs text-zinc-600 py-8 text-center">今日暂无数据</div>
+        </div>
+      </template>
 
-          <!-- News -->
-          <div class="mt-5" x-show="stockNews.length">
-            <div class="text-[11px] font-medium text-zinc-400 mb-2 uppercase tracking-wider">相关新闻</div>
-            <div class="divide-y divide-zinc-800/30">
-              <template x-for="n in stockNews" :key="n.id || n.title">
-                <div class="nitem">
-                  <div class="flex items-start gap-2">
-                    <span class="text-[10px] text-zinc-600 shrink-0 mt-[2px] w-6 font-mono"
-                          x-text="n.source === '东方财富' ? '东财' : '新浪'"></span>
-                    <a :href="n.url" target="_blank" class="flex-1 min-w-0" x-text="n.title"></a>
+      <!-- ===== 标的 STOCK ===== -->
+      <template x-if="view === 'stock'">
+        <div class="max-w-3xl">
+          <div x-show="selectedStock">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="text-base font-semibold text-zinc-100 mono" x-text="selectedStock"></span>
+                <span class="text-xs text-zinc-500 ml-2" x-text="stockNews.length + ' 篇新闻'"></span>
+              </div>
+            </div>
+
+            <!-- News timeline -->
+            <div x-show="stockNews.length" class="tl">
+              <template x-for="(n, i) in stockNews" :key="n.id || n.title">
+                <div class="tl-item">
+                  <div class="tl-dot border-acc"></div>
+                  <div class="tl-time flex items-center gap-2">
+                    <span class="text-[10px] px-1.5 rounded bg-zinc-800 text-zinc-500" x-text="n.source"></span>
+                    <span x-text="n.news_time || n.news_date"></span>
                   </div>
-                  <div class="text-[10px] text-zinc-600 mt-[1px] ml-8" x-text="n.news_time || n.news_date"></div>
+                  <a :href="n.url" target="_blank" class="text-xs text-zinc-300 hover:text-acc no-underline leading-relaxed" x-text="n.title"></a>
                 </div>
               </template>
             </div>
+            <div x-show="!stockNews.length" class="text-xs text-zinc-600 py-8 text-center">暂无新闻</div>
           </div>
+          <div x-show="!selectedStock" class="text-xs text-zinc-600 py-8 text-center">从左侧选择一只股票</div>
         </div>
       </template>
 
-      <!-- ============ NEWS ============ -->
-      <template x-if="activeTab === 'news'">
-        <div>
+      <!-- ===== 新闻 NEWS ===== -->
+      <template x-if="view === 'news'">
+        <div class="max-w-4xl">
           <div class="flex items-center gap-2 mb-3 flex-wrap">
-            <input type="text" x-model="newsSearch" @input.debounce="loadNewsList()" placeholder="搜索" class="sinp w-40">
-            <input type="date" x-model="newsDate" @change="loadNewsList()" class="sinp w-auto">
-            <select x-model="newsStock" @change="loadNewsList()" class="sinp w-auto">
-              <option value="">全部</option>
+            <input type="text" x-model="newsQuery" @input.debounce="loadAllNews()" placeholder="关键词" class="sinp w-40">
+            <input type="date" x-model="newsDate" @change="loadAllNews()" class="sinp w-auto">
+            <select x-model="newsCode" @change="loadAllNews()" class="sinp w-auto">
+              <option value="">全部标的</option>
               <template x-for="s in stocks" :key="s"><option :value="s" x-text="s"></option></template>
             </select>
           </div>
-          <div class="divide-y divide-zinc-800/30">
-            <template x-for="n in newsList" :key="n.id || n.title + n.news_date">
+          <div x-show="allNews.length">
+            <template x-for="n in allNews" :key="n.id || n.title + n.news_date">
               <div class="nitem">
                 <div class="flex items-start gap-2">
-                  <span class="text-[10px] font-mono shrink-0 w-8 text-center"
+                  <span class="text-[10px] mono shrink-0 w-8 text-center"
                         :class="n.source === '东方财富' ? 'text-acc/70' : 'text-orange-400/70'"
-                        x-text="n.source"></span>
-                  <a :href="n.url" target="_blank" class="flex-1 min-w-0 text-zinc-200 hover:text-acc no-underline text-xs" x-text="n.title"></a>
+                        x-text="n.source === '东方财富' ? '东财' : n.source"></span>
+                  <a :href="n.url" target="_blank" class="flex-1 min-w-0" x-text="n.title"></a>
                 </div>
-                <div class="flex gap-3 text-[10px] text-zinc-600 mt-[1px] ml-10">
-                  <span class="font-mono" x-text="n.ts_code"></span>
+                <div class="flex gap-3 text-[10px] text-zinc-600 mt-0.5 ml-10">
+                  <span class="mono" x-text="n.ts_code"></span>
                   <span x-text="n.news_time || n.news_date"></span>
                 </div>
               </div>
             </template>
-            <div x-show="!newsList.length" class="text-xs text-zinc-600 py-6 text-center">无匹配新闻</div>
           </div>
+          <div x-show="!allNews.length" class="text-xs text-zinc-600 py-8 text-center">无匹配新闻</div>
         </div>
       </template>
 
-      <!-- ============ MACRO ============ -->
-      <template x-if="activeTab === 'macro'">
-        <div>
+      <!-- ===== 宏观 MACRO ===== -->
+      <template x-if="view === 'macro'">
+        <div class="max-w-3xl">
           <div class="flex items-center gap-2 mb-3">
             <input type="date" x-model="macroDate" @change="loadMacro()" class="sinp w-auto">
           </div>
-          <div class="divide-y divide-zinc-800/30">
+          <div x-show="macroList.length" class="tl">
             <template x-for="e in macroList" :key="e.id || e.title">
-              <div class="nitem">
-                <div class="flex items-start gap-2">
-                  <span class="w-4 text-center shrink-0 font-mono text-[11px] font-bold"
-                        :class="e.importance >= 4 ? 'text-fall' : e.importance === 3 ? 'text-amber-500' : 'text-acc'" x-text="e.importance >= 4 ? '!' : e.importance === 3 ? '·' : '○'"></span>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-xs text-zinc-200" x-text="e.title"></div>
-                    <div class="flex gap-2 text-[10px] text-zinc-600 mt-[1px]">
-                      <span class="badge bg-zinc-800 text-zinc-500" x-text="e.category"></span>
-                      <span x-text="e.event_time || e.event_date"></span>
-                    </div>
-                  </div>
+              <div class="tl-item">
+                <div class="tl-dot" :class="e.importance >= 4 ? 'border-fall' : e.importance === 3 ? 'border-amber-500' : 'border-zinc-600'"></div>
+                <div class="tl-time">
+                  <span class="text-[10px] px-1.5 rounded bg-zinc-800 text-zinc-500 mr-1" x-text="e.category"></span>
+                  <span x-text="e.event_time || e.event_date"></span>
                 </div>
+                <div class="text-xs text-zinc-300 leading-relaxed" x-text="e.title"></div>
+                <div x-show="e.content" class="text-[11px] text-zinc-600 mt-0.5 line-clamp-2" x-text="e.content"></div>
               </div>
             </template>
-            <div x-show="!macroList.length" class="text-xs text-zinc-600 py-6 text-center">暂无宏观快讯</div>
           </div>
+          <div x-show="!macroList.length" class="text-xs text-zinc-600 py-8 text-center">暂无宏观快讯</div>
         </div>
       </template>
 
-      <!-- ============ LOGS ============ -->
-      <template x-if="activeTab === 'logs'">
+      <!-- ===== 日志 LOGS ===== -->
+      <template x-if="view === 'logs'">
         <div>
           <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
             <table class="tbl">
-              <thead><tr><th>日期</th><th>模块</th><th>股票</th><th>状态</th><th>记录</th><th>耗时</th></tr></thead>
+              <thead><tr><th>日期</th><th>模块</th><th>标的</th><th>状态</th><th>记录</th><th>耗时</th></tr></thead>
               <tbody>
                 <template x-for="l in logList" :key="l.id">
                   <tr>
-                    <td class="text-zinc-500 text-[11px]" x-text="l.run_date"></td>
+                    <td class="text-zinc-500 text-[11px] mono" x-text="l.run_date"></td>
                     <td class="text-[11px] text-zinc-400" x-text="l.module"></td>
-                    <td class="text-[11px] text-zinc-500 font-mono" x-text="l.ts_code"></td>
+                    <td class="text-[11px] text-zinc-500 mono" x-text="l.ts_code"></td>
                     <td><span class="badge" :class="l.status==='success' ? 'bg-rise/10 text-rise/80' : l.status==='error' ? 'bg-fall/10 text-fall/80' : 'bg-zinc-800 text-zinc-500'" x-text="l.status"></span></td>
-                    <td class="text-zinc-500" x-text="l.records"></td>
-                    <td class="text-zinc-600 text-[11px]" x-text="l.duration_s ? l.duration_s.toFixed(1)+'s' : '—'"></td>
+                    <td class="text-zinc-500 mono" x-text="l.records"></td>
+                    <td class="text-zinc-600 text-[11px] mono" x-text="l.duration_s ? l.duration_s.toFixed(1)+'s' : '—'"></td>
                   </tr>
                 </template>
               </tbody>
             </table>
-            <div x-show="!logList.length" class="text-xs text-zinc-600 py-6 text-center">暂无日志</div>
+            <div x-show="!logList.length" class="text-xs text-zinc-600 py-8 text-center">暂无日志</div>
           </div>
         </div>
       </template>
@@ -326,54 +278,79 @@ tailwind.config = {
     </div><!-- /content -->
 
     <!-- Floating bar -->
-    <div class="fixed bottom-0 left-[200px] right-0 bg-zinc-900/80 backdrop-blur border-t border-zinc-800/50 px-5 py-[6px] text-[10px] text-zinc-600 flex items-center gap-4 z-10 font-mono">
-      <span class="inline-block w-1.5 h-1.5 rounded-full bg-rise/60 mr-1 align-middle"></span>
-      <span class="font-mono text-[11px]">行情 <span x-text="stats.price_records || 0"></span></span>
-      <span class="font-mono text-[11px]">新闻 <span x-text="stats.news_records || 0"></span></span>
-      <span class="font-mono text-[11px]">宏观 <span x-text="stats.macro_records || 0"></span></span>
+    <div class="fixed bottom-0 left-[200px] right-0 bg-zinc-900/80 backdrop-blur border-t border-zinc-800/50 px-5 py-[6px] text-[10px] text-zinc-600 flex items-center gap-4 z-10 mono">
+      <span>新闻 <span x-text="stats.news_records || 0"></span></span>
+      <span>宏观 <span x-text="stats.macro_records || 0"></span></span>
+      <span>标的 <span x-text="stats.stocks || 0"></span></span>
       <span class="flex-1"></span>
-      <span x-text="dbStatus" class="text-acc/70"></span>
+      <span class="text-acc/70" x-text="dbStatus"></span>
     </div>
-
   </div>
 </div>
+
+<style>
+  .tbl { width: 100%; border-collapse: collapse; }
+  .tbl th { text-align: left; padding: 6px 10px; font-size: 10px; font-weight: 500; color: #52525b; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid #1f1f24; }
+  .tbl td { padding: 5px 10px; border-bottom: 1px solid #141417; font-size: 12px; mono: true; white-space: nowrap; }
+  .tbl tr:hover td { background: #141417; }
+</style>
 
 <script>
 function app() {
   return {
-    stocks: [], stats: {}, topMovers: [], latestSummary: '',
-    activeTab: 'dashboard', selectedStock: '', searchQuery: '',
-    stockDetail: [], stockNews: [], chartDays: '60',
-    newsList: [], newsSearch: '', newsDate: '', newsStock: '',
+    stocks: [], stats: {},
+    view: 'today', selectedStock: '', searchQuery: '',
+    todayNews: [], todayMacro: [], allNews: [],
+    stockNews: [],
+    newsQuery: '', newsDate: '', newsCode: '',
     macroList: [], macroDate: '',
     logList: [],
-    lastUpdated: '', dbStatus: '···',
+    dbStatus: '···',
 
     tabs: [
-      { id: 'dashboard', label: '概览' },
-      { id: 'stock',     label: '个股' },
-      { id: 'news',      label: '新闻' },
-      { id: 'macro',     label: '宏观' },
-      { id: 'logs',      label: '日志' },
+      { id: 'today', label: '今' },
+      { id: 'stock', label: '标的' },
+      { id: 'news',  label: '新闻' },
+      { id: 'macro', label: '宏观' },
+      { id: 'logs',  label: '日志' },
     ],
 
+    get todayStr() {
+      return new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' });
+    },
     get filteredStocks() {
       if (!this.searchQuery) return this.stocks;
-      const q = this.searchQuery.toUpperCase();
-      return this.stocks.filter(s => s.includes(q));
+      return this.stocks.filter(s => s.toUpperCase().includes(this.searchQuery.toUpperCase()));
+    },
+    get todayNewsCount() {
+      const t = new Date().toISOString().slice(0, 10);
+      return this.todayNews.filter(n => n.news_date === t || n.news_date === t.replace(/-/g, '-')).length;
+    },
+    get todayMacroCount() { return this.todayMacro.length; },
+    get activeStockCount() {
+      const t = new Date().toISOString().slice(0, 10);
+      return new Set(this.todayNews.filter(n => n.news_date === t).map(n => n.ts_code)).size;
+    },
+    get todayByStock() {
+      const map = {};
+      const t = new Date().toISOString().slice(0, 10);
+      this.todayNews.filter(n => n.news_date === t).forEach(n => {
+        if (!map[n.ts_code]) map[n.ts_code] = [];
+        map[n.ts_code].push(n);
+      });
+      return map;
     },
 
     async init() {
       await this.loadStats();
       await this.loadStocks();
-      await this.loadDashboard();
-      this.lastUpdated = new Date().toLocaleTimeString('zh-CN');
-      setInterval(() => { this.loadStats(); this.lastUpdated = new Date().toLocaleTimeString('zh-CN'); }, 30000);
+      await this.loadToday();
+      setInterval(() => this.loadStats(), 30000);
     },
 
-    async api(path) {
-      try { const r = await fetch(path); if (!r.ok) throw new Error(r.statusText); return await r.json(); }
-      catch(e) { this.dbStatus = '⚠'; return null; }
+    async api(p) {
+      try { const r = await fetch(p); if (!r.ok) throw new Error(); return await r.json(); }
+      catch(e) { return null; }
     },
 
     async loadStats() {
@@ -384,33 +361,28 @@ function app() {
       const d = await this.api('/api/stocks');
       if (d) this.stocks = d;
     },
-    async loadDashboard() {
-      const top = await this.api('/api/dashboard/top');
-      if (top) this.topMovers = top;
-      const sum = await this.api('/api/dashboard/summary');
-      if (sum) this.latestSummary = sum;
+    async loadToday() {
+      const t = new Date().toISOString().slice(0, 10);
+      const [news, macro] = await Promise.all([
+        this.api(`/api/news?date=${t}&limit=100`),
+        this.api(`/api/macro?date=${t}`),
+      ]);
+      if (news) this.todayNews = news;
+      if (macro) this.macroList = macro;
+      this.macroDate = t;
     },
     async selectStock(code) {
-      this.selectedStock = code; this.activeTab = 'stock';
-      await this.loadStockDetail(); await this.loadStockNews();
-    },
-    async loadStockDetail() {
-      if (!this.selectedStock) return;
-      const d = await this.api(`/api/stock/${this.selectedStock}?days=${this.chartDays}`);
-      if (d) this.stockDetail = d;
-    },
-    async loadStockNews() {
-      if (!this.selectedStock) return;
-      const d = await this.api(`/api/stock/${this.selectedStock}/news`);
+      this.selectedStock = code; this.view = 'stock';
+      const d = await this.api(`/api/stock/${code}/news?limit=100`);
       if (d) this.stockNews = d;
     },
-    async loadNewsList() {
+    async loadAllNews() {
       const p = new URLSearchParams();
-      if (this.newsSearch) p.set('q', this.newsSearch);
+      if (this.newsQuery) p.set('q', this.newsQuery);
       if (this.newsDate) p.set('date', this.newsDate);
-      if (this.newsStock) p.set('ts_code', this.newsStock);
-      const d = await this.api(`/api/news?${p.toString()}`);
-      if (d) this.newsList = d;
+      if (this.newsCode) p.set('ts_code', this.newsCode);
+      const d = await this.api(`/api/news?${p.toString()}&limit=100`);
+      if (d) this.allNews = d;
     },
     async loadMacro() {
       const p = new URLSearchParams();
@@ -418,25 +390,21 @@ function app() {
       const d = await this.api(`/api/macro?${p.toString()}`);
       if (d) this.macroList = d;
     },
-    async loadTab() {
-      if (this.activeTab === 'dashboard') await this.loadDashboard();
-      else if (this.activeTab === 'news') await this.loadNewsList();
-      else if (this.activeTab === 'macro') await this.loadMacro();
-      else if (this.activeTab === 'logs') await this.loadLogs();
-    },
-    async loadLogs() {
-      const d = await this.api('/api/logs');
-      if (d) this.logList = d;
+    async loadView() {
+      if (this.view === 'today') await this.loadToday();
+      else if (this.view === 'news') await this.loadAllNews();
+      else if (this.view === 'macro') await this.loadMacro();
+      else if (this.view === 'logs') {
+        const d = await this.api('/api/logs');
+        if (d) this.logList = d;
+      }
     },
 
-    stockChange(code) {
-      for (const r of this.topMovers) { if (r.ts_code === code) return r.change_pct; }
-      return null;
+    hasNews(code) {
+      return this.todayNews.some(n => n.ts_code === code);
     },
-    stockChangeFmt(code) {
-      const v = this.stockChange(code);
-      if (v === null) return '—';
-      return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+    newsCount(code) {
+      return this.todayNews.filter(n => n.ts_code === code).length || '';
     },
     filterStocks() {},
   };
