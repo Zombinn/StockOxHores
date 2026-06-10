@@ -139,14 +139,7 @@ def fetch_news_html(ts_code: str) -> Optional[List[Dict]]:
 
 
 def fetch_news(ts_code: str) -> List[Dict]:
-    """获取个股新闻 - 多接口策略"""
-    # 主接口: feed API
-    results = fetch_news_feed(ts_code)
-    if results:
-        return results
-
-    # 备用: HTML 爬取
-    logger.info(f"[新浪] feed 无数据，尝试 HTML 页面 {ts_code}")
+    """获取个股新闻 - 直接走HTML爬取（feed API已失效）"""
     results = fetch_news_html(ts_code)
     return results or []
 

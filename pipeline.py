@@ -70,20 +70,16 @@ def run_daily(
     # ─── 2. 采集个股新闻 ───
     if not skip_news:
         logger.info(f"[PIPELINE] 开始采集新闻: {len(ts_codes)} 只股票")
-        from scraper import news_eastmoney, news_sina
+        from scraper import news_sina
 
         for i, ts_code in enumerate(ts_codes):
+            # 美股没新闻源，跳过
+            if "." not in ts_code:
+                continue
             try:
-                # 东方财富
-                c1 = news_eastmoney.run(ts_code, trade_date)
-                stats["news_records"] += c1
-
-                # 新浪财经（补充，间隔一下）
-                time.sleep(1)
                 c2 = news_sina.run(ts_code, trade_date)
                 stats["news_records"] += c2
-
-                logger.info(f"[PIPELINE] [{i+1}/{len(ts_codes)}] {ts_code} 新闻: 东财={c1} 新浪={c2}")
+                logger.info(f"[PIPELINE] [{i+1}/{len(ts_codes)}] {ts_code} 新闻: 新浪={c2}")
             except Exception as e:
                 logger.error(f"[PIPELINE] {ts_code} 新闻异常: {e}")
                 stats["errors"].append(f"{ts_code} 新闻: {e}")
@@ -162,13 +158,14 @@ def _generate_summary(ts_codes: List[str], trade_date, stats: dict):
     conn.commit()
 
 
-def run_backfill(ts_codes: Optional[List[str]] = None, months: int = 12):
+def run_backfill(ts_codes: Optional[List[str]] = None, months: int = 12, with_news: bool = False):
     """
-    历史回填：批量采集近N个月的数据
+    历史回填：批量采集近N个月的数据（默认只跑行情，跳过新闻）
 
     Args:
         ts_codes: 股票列表（默认从配置读取）
         months: 回填月数
+        with_news: 是否同时采集新闻（默认False）
     """
     if ts_codes is None:
         ts_codes = get_stocks()
@@ -193,7 +190,7 @@ def run_backfill(ts_codes: Optional[List[str]] = None, months: int = 12):
             continue
 
         logger.info(f"[BACKFILL] 处理 {current}")
-        stats = run_daily(ts_codes, trade_date=current)
+        stats = run_daily(ts_codes, trade_date=current, skip_news=not with_news)
         total_price += stats["price_records"]
         total_news += stats["news_records"]
         total_macro += stats["macro_records"]
