@@ -1,0 +1,9 @@
+stock_data.duckdb
+*.pyc
+__pycache__/
+.DS_Store
+.venv/
+venv/
+*.egg-info/
+dist/
+build/

@@ -1,0 +1,34 @@
+# Stock Watcher 配置
+db_path: "stock_data.duckdb"
+
+# 自选股 — 支持多种格式（系统自动标准化）
+#   纯数字6位 → A股（3/0/2开头深交所，6/9开头上交所）
+#   SH/SZ前缀 → 自动去前缀加后缀
+#   纯字母 → 美股原样
+stocks:
+  - "300750"      # 宁德时代
+  - "300308"      # 中际旭创
+  - "301308"      # 江波龙
+  - "002028"      # 思源电气
+  - "002409"      # 雅克科技
+  - "SH600519"    # 贵州茅台
+  - "NVDA"        # NVIDIA
+  - "TSLA"        # Tesla
+  - "SPCX"        # S&P 500 ETF
+  - "MU"          # Micron
+  - "SNDK"        # SanDisk
+  - "AAPL"        # Apple
+
+scraper:
+  request_delay: 2.0
+  max_retries: 3
+  user_agents:
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+backfill:
+  months: 12
+  batch_days: 5
+
+log_level: "INFO"
