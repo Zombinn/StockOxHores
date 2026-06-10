@@ -111,8 +111,8 @@ tailwind.config = {
     </div>
 
     <div class="px-4 py-2 border-t border-zinc-800/50 text-[10px] text-zinc-600 flex justify-between font-mono">
-      <span>📰 <span x-text="stats.news_records || 0"></span></span>
-      <span>📡 <span x-text="stats.macro_records || 0"></span></span>
+      <span>N <span x-text="stats.news_records || 0"></span></span>
+      <span>M <span x-text="stats.macro_records || 0"></span></span>
       <span class="text-acc/60" x-text="lastUpdated"></span>
     </div>
   </div>
@@ -282,7 +282,8 @@ tailwind.config = {
             <template x-for="e in macroList" :key="e.id || e.title">
               <div class="nitem">
                 <div class="flex items-start gap-2">
-                  <span class="text-xs mt-[2px]" x-text="e.importance >= 4 ? '🔴' : e.importance === 3 ? '🟡' : '🔵'"></span>
+                  <span class="w-4 text-center shrink-0 font-mono text-[11px] font-bold"
+                        :class="e.importance >= 4 ? 'text-fall' : e.importance === 3 ? 'text-amber-500' : 'text-acc'" x-text="e.importance >= 4 ? '!' : e.importance === 3 ? '·' : '○'"></span>
                   <div class="flex-1 min-w-0">
                     <div class="text-xs text-zinc-200" x-text="e.title"></div>
                     <div class="flex gap-2 text-[10px] text-zinc-600 mt-[1px]">
@@ -326,9 +327,10 @@ tailwind.config = {
 
     <!-- Floating bar -->
     <div class="fixed bottom-0 left-[200px] right-0 bg-zinc-900/80 backdrop-blur border-t border-zinc-800/50 px-5 py-[6px] text-[10px] text-zinc-600 flex items-center gap-4 z-10 font-mono">
-      <span>📊 <span x-text="stats.price_records || 0"></span></span>
-      <span>📰 <span x-text="stats.news_records || 0"></span></span>
-      <span>📡 <span x-text="stats.macro_records || 0"></span></span>
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-rise/60 mr-1 align-middle"></span>
+      <span class="font-mono text-[11px]">P <span x-text="stats.price_records || 0"></span></span>
+      <span class="font-mono text-[11px]">N <span x-text="stats.news_records || 0"></span></span>
+      <span class="font-mono text-[11px]">M <span x-text="stats.macro_records || 0"></span></span>
       <span class="flex-1"></span>
       <span x-text="dbStatus" class="text-acc/70"></span>
     </div>
