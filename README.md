@@ -1,103 +1,89 @@
-# StockOxHores 📈
+# StockOxHores ⊕ 情报匹配系统
 
-A股 + 美股每日行情与新闻数据采集系统。自建爬虫 + yfinance 驱动，DuckDB 本地存储，轻量 Web 管理前端。
+信息搜集 → 新闻匹配 → 事件归因 → 趋势预测。
 
-## 快速开始
+基于历史事件数据库，匹配新闻与股价变动，预测走向及未来影响因素。
 
-```bash
-# 1. 装依赖
-pip3.12 install --break-system-packages --user -r requirements.txt
+## 定位
 
-# 2. 初始化数据库
-python3 -c "from db import init_db; init_db()"
+| 系统 | 职责 |
+|------|------|
+| [StockWatcher](https://github.com/Zombinn/StockWatcher) | 行情分析、股价图表、技术指标 |
+| **StockOxHores** | 情报搜集、新闻匹配、事件归因、预测 |
 
-# 3. 回填历史数据
-python3 backfill.py --months 12
-
-# 4. 启动管理前端
-python3 serve.py
-# → http://127.0.0.1:8766
-```
+两者互补：StockWatcher 告诉你 **发生了什么**，StockOxHores 告诉你 **为什么发生**。
 
 ## 项目结构
 
 ```
 StockOxHores/
-├── config.yaml           # 自选股配置（支持多种格式）
-├── requirements.txt      # 依赖清单
+├── config.yaml          # 自选股（支持多种格式）
+├── daily.py             # 每日采集入口（Hermes cronjob 调用）
+├── backfill.py          # 历史回填
+├── pipeline.py          # 主编排
+├── query.py             # CLI 查询
+├── serve.py             # Web 管理前端（FastAPI）
 ├── db/
-│   ├── schema.sql        # DuckDB 建表（5张表）
-│   └── __init__.py       # DB 连接 + 代码标准化
+│   ├── schema.sql       # DuckDB 5张表
+│   └── __init__.py      # DB 连接 + 代码标准化
 ├── scraper/
-│   ├── base.py           # 爬虫基类（UA轮换/重试/日志）
-│   ├── price.py          # yfinance 行情采集
-│   ├── news_eastmoney.py # 东方财富新闻爬虫
-│   ├── news_sina.py      # 新浪财经新闻爬虫
-│   └── news_cls.py       # 财联社宏观快讯爬虫
-├── pipeline.py           # 主编排（单日全流程）
-├── backfill.py           # 历史回填入口
-├── daily.py              # 每日运行入口
-├── query.py              # 终端查询工具
-├── serve.py              # FastAPI 服务端
+│   ├── price.py         # yfinance 行情（仅关联用）
+│   ├── news_sina.py     # 新浪财经新闻爬虫
+│   ├── news_eastmoney.py# 东方财富（待修复）
+│   └── news_cls.py      # 财联社宏观快讯（待修复）
 └── templates/
-    └── index.html        # 管理面板（深色 Terminal 风格）
+    └── index.html       # 前端（时间线式信息流）
 ```
 
-## 股票代码格式
+## 定时任务
 
-配置文件 `config.yaml` 支持任意格式，系统自动标准化：
-
-| 你写的 | 自动转成 | 说明 |
-|--------|---------|------|
-| `300750` | `300750.SZ` | 纯数字6位→A股（3/0/2深交所，6/9上交所） |
-| `SH600519` | `600519.SH` | SH/SZ前缀自动去 |
-| `NVDA` | `NVDA` | 纯字母→美股原样 |
-| `000001.SZ` | `000001.SZ` | 已有后缀不变 |
-
-## 日常命令
+每日 17:00（A股收盘后）自动运行，采集当日新闻+宏观快讯。
 
 ```bash
-# 采集今天
-python3 daily.py
-
-# 补某天
-python3 daily.py --date 2026-06-09
-
-# 回填历史
-python3 backfill.py --months 12
-
-# 查询数据
-python3 query.py stats                    # 数据统计
-python3 query.py stock 300750.SZ          # 个股行情
-python3 query.py stock 300750.SZ --days 60
-python3 query.py top --date 2026-06-09    # 涨跌排行
-python3 query.py news 300750.SZ           # 个股新闻
-python3 query.py macro                    # 宏观快讯
-
-# 启动前端
-python3 serve.py                          # → http://127.0.0.1:8766
-python3 serve.py --port 8888              # 指定端口
+hermes cron ls                    # 查看定时任务
+hermes cron run 071837a8b914      # 手动触发一次
+hermes cron pause 071837a8b914    # 暂停
 ```
 
-## 数据来源
+也可手动运行：
 
-| 数据 | 来源 | 方式 |
-|------|------|------|
-| A股行情 | yfinance (Yahoo Finance) | API |
-| 美股行情 | yfinance | API |
-| 个股新闻 | 新浪财经 | HTML 爬虫 |
-| 个股新闻 | 东方财富 | API（受限） |
-| 宏观快讯 | 财联社 | API（待修复） |
+```bash
+python3 daily.py                          # 采集今天
+python3 daily.py --date 2026-06-09        # 补某天
+python3 backfill.py --months 12           # 回填历史
+python3 backfill.py --months 12 --with-news  # 带新闻回填
+```
 
-## 设计风格
+## 前端
 
-前端基于 [design-taste-frontend](https://github.com) 反AI默认设计理念：
-- 深色 Terminal 金融风（zinc-900 + cyan 强调 + 绿涨红跌）
-- 三旋钮：VARIANCE=3 / MOTION=2 / DENSITY=6
-- 无 AI 默认紫色渐变
-- 单一字体系统、单一强调色
-- Tailwind CSS + Alpine.js（零构建、零 npm）
+```bash
+python3 serve.py          # http://127.0.0.1:8766
+```
 
-## License
+| Tab | 内容 |
+|-----|------|
+| 今 | 今日新闻按标的分组 + 宏观时间线 |
+| 标的 | 选中标的的全部新闻时间线 |
+| 新闻 | 全局搜索（关键词/日期/标的过滤） |
+| 宏观 | 政策/宏观快讯时间线 |
+| 日志 | 采集运行日志 |
 
-MIT
+## Roadmap
+
+- [x] 新闻采集（新浪财经）
+- [x] 宏观快讯采集
+- [x] 管理前端
+- [x] 每日定时任务
+- [ ] 新闻情感分析（sentiment scoring）
+- [ ] 事件-股价关联匹配
+- [ ] 历史模式识别
+- [ ] 趋势预测
+- [ ] 与 StockWatcher 数据互通
+
+## 设计
+
+基于 [design-taste-frontend](https://github.com) 反AI默认设计理念。
+- 深色 Terminal 风，单强调色 cyan
+- 信息密度优先（DENSITY=7）
+- 时间线式信息流阅读
+- 无 emoji、无 AI 紫色渐变
