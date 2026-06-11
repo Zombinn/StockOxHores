@@ -317,6 +317,16 @@ async def resume_cron(job_id: str):
     return _hermes_cron(["resume", job_id])
 
 
+@app.post("/api/cron/{job_id}/update")
+async def update_cron(job_id: str, name: str = "", schedule: str = ""):
+    args = ["update", job_id]
+    if name:
+        args += ["--name", name]
+    if schedule:
+        args += ["--schedule", schedule]
+    return _hermes_cron(args)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="StockOxHores Server")
     parser.add_argument("--port", type=int, default=8767, help="监听端口（默认 8767）")
