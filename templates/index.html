@@ -576,10 +576,7 @@ function app() {
 
     async loadCron() {
       const d = await this.api('/api/cron');
-      if (d && d.ok) {
-        try { this.cronJobs = JSON.parse(d.output).jobs || []; }
-        catch(e) { this.cronJobs = []; }
-      }
+      if (d && d.jobs) this.cronJobs = d.jobs;
     },
     async cronRun(id) {
       await this.api(`/api/cron/${id}/run`);

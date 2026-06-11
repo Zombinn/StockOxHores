@@ -292,9 +292,50 @@ HERMES = "/Users/zombin/.hermes/hermes-agent/venv/bin/hermes"
 def _hermes_cron(args: list) -> dict:
     try:
         r = subprocess.run([HERMES, "cron"] + args, capture_output=True, text=True, timeout=15)
-        return {"ok": r.returncode == 0, "output": r.stdout, "error": r.stderr}
+        output = r.stdout
+        # Parse formatted table into structured data
+        jobs = []
+        current = {}
+        for line in output.split("\n"):
+            line = line.strip()
+            if not line or line.startswith("─") or line.startswith("┌") or line.startswith("└") or line.startswith("│"):
+                continue
+            if "Scheduled Jobs" in line or "No jobs" in line:
+                continue
+            if line.startswith("⚠"):
+                continue
+            # Job ID line
+            parts = line.split()
+            if len(parts) >= 2 and len(parts[0]) == 12 and parts[0].isdigit():
+                if current:
+                    jobs.append(current)
+                current = {"job_id": parts[0], "state": parts[1].strip("[]")}
+            elif current:
+                for prefix in ["Name:", "Schedule:", "Repeat:", "Next run:", "Deliver:", "Script:", "Last run:"]:
+                    if line.startswith(prefix):
+                        val = line[len(prefix):].strip()
+                        key = prefix.lower().replace(" ", "_").replace(":", "")
+                        if key == "last_run":
+                            # Parse "2026-06-11T17:09:21.454762+10:00  error: ..."
+                            if "  error:" in val:
+                                ts, err = val.split("  error:", 1)
+                                current["last_run_at"] = ts.strip()
+                                current["last_status"] = "error"
+                                current["last_error"] = err.strip()
+                            else:
+                                current["last_run_at"] = val
+                                current["last_status"] = "success"
+                        elif key == "next_run":
+                            current["next_run_at"] = val
+                        elif key == "repeat":
+                            current["repeat"] = "forever" if val in ("∞", "forever") else val
+                        else:
+                            current[key] = val
+        if current:
+            jobs.append(current)
+        return {"ok": r.returncode == 0, "output": output, "jobs": jobs, "error": r.stderr}
     except Exception as e:
-        return {"ok": False, "error": str(e)}
+        return {"ok": False, "error": str(e), "jobs": []}
 
 
 @app.get("/api/cron")
@@ -317,7 +358,7 @@ async def resume_cron(job_id: str):
     return _hermes_cron(["resume", job_id])
 
 
-@app.post("/api/cron/{job_id}/update")
+@app.get("/api/cron/{job_id}/update")
 async def update_cron(job_id: str, name: str = "", schedule: str = ""):
     args = ["update", job_id]
     if name:
