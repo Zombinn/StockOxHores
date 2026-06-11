@@ -306,7 +306,7 @@ def _hermes_cron(args: list) -> dict:
                 continue
             # Job ID line
             parts = line.split()
-            if len(parts) >= 2 and len(parts[0]) == 12 and parts[0].isdigit():
+            if len(parts) >= 2 and len(parts[0]) == 12 and all(c in "0123456789abcdef" for c in parts[0].lower()):
                 if current:
                     jobs.append(current)
                 current = {"job_id": parts[0], "state": parts[1].strip("[]")}
@@ -343,17 +343,17 @@ async def list_cron():
     return _hermes_cron(["list"])
 
 
-@app.post("/api/cron/{job_id}/run")
+@app.get("/api/cron/{job_id}/run")
 async def run_cron(job_id: str):
     return _hermes_cron(["run", job_id])
 
 
-@app.post("/api/cron/{job_id}/pause")
+@app.get("/api/cron/{job_id}/pause")
 async def pause_cron(job_id: str):
     return _hermes_cron(["pause", job_id])
 
 
-@app.post("/api/cron/{job_id}/resume")
+@app.get("/api/cron/{job_id}/resume")
 async def resume_cron(job_id: str):
     return _hermes_cron(["resume", job_id])
 
