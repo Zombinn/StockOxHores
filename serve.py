@@ -241,7 +241,7 @@ async def get_macro(
 async def get_logs(limit: int = Query(100, alias="limit")):
     conn = get_conn()
     rows = conn.execute(
-        """SELECT run_date, module, ts_code, status, records, message, duration_s
+        """SELECT run_date, module, ts_code, status, records, message, duration_s, created_at
            FROM run_log
            ORDER BY created_at DESC
            LIMIT ?""",
@@ -256,6 +256,7 @@ async def get_logs(limit: int = Query(100, alias="limit")):
             "records": r[4] or 0,
             "message": r[5],
             "duration_s": float(r[6]) if r[6] else None,
+            "created_at": str(r[7])[:19] if r[7] else None,
         }
         for r in rows
     ]

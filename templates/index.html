@@ -436,7 +436,7 @@ tailwind.config = {
           <template x-for="l in modalLogs" :key="l.run_date + l.module + l.ts_code">
             <div class="p-3 rounded bg-zinc-800/30 border border-zinc-800/50 text-xs">
               <div class="flex items-center justify-between mb-1">
-                <span class="mono text-zinc-400" x-text="l.run_date"></span>
+                <span class="mono text-zinc-400" x-text="l.created_at || l.run_date"></span>
                 <span class="badge" :class="l.status==='success' ? 'bg-rise/10 text-rise/80' : l.status==='error' ? 'bg-fall/10 text-fall/80' : 'bg-zinc-800 text-zinc-500'" x-text="l.status"></span>
               </div>
               <div class="flex gap-3 text-[10px] text-zinc-600">
@@ -617,6 +617,7 @@ function app() {
     async cronRun(id) {
       await this.api(`/api/cron/${id}/run`);
       await this.loadCron();
+      await this.showJobLogs({name: '执行中…'});
     },
     async cronPause(id) {
       await this.api(`/api/cron/${id}/pause`);
