@@ -70,16 +70,20 @@ def run_daily(
     # ─── 2. 采集个股新闻 ───
     if not skip_news:
         logger.info(f"[PIPELINE] 开始采集新闻: {len(ts_codes)} 只股票")
-        from scraper import news_sina
+        from scraper import news_sina, news_yf
 
         for i, ts_code in enumerate(ts_codes):
-            # 美股没新闻源，跳过
-            if "." not in ts_code:
-                continue
             try:
-                c2 = news_sina.run(ts_code, trade_date)
-                stats["news_records"] += c2
-                logger.info(f"[PIPELINE] [{i+1}/{len(ts_codes)}] {ts_code} 新闻: 新浪={c2}")
+                if "." in ts_code:
+                    # A股 → 新浪财经
+                    c = news_sina.run(ts_code, trade_date)
+                    stats["news_records"] += c
+                    logger.info(f"[PIPELINE] [{i+1}/{len(ts_codes)}] {ts_code} 新闻: 新浪={c}")
+                else:
+                    # 美股/港股 → yfinance 新闻
+                    c = news_yf.run(ts_code, trade_date)
+                    stats["news_records"] += c
+                    logger.info(f"[PIPELINE] [{i+1}/{len(ts_codes)}] {ts_code} 新闻: yf={c}")
             except Exception as e:
                 logger.error(f"[PIPELINE] {ts_code} 新闻异常: {e}")
                 stats["errors"].append(f"{ts_code} 新闻: {e}")
