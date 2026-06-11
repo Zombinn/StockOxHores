@@ -289,76 +289,81 @@ tailwind.config = {
           </div>
           <div class="text-[10px] text-zinc-600 mono mb-4" x-show="sentiment.total">分析 <span x-text="sentiment.total"></span> 条 · 正负比 <span x-text="sentiment.ratio"></span></div>
 
-          <!-- Day correlation picker -->
-          <div class="text-sm font-medium text-zinc-300 mb-3">新闻-涨跌关联</div>
-          <div class="flex items-center gap-2 mb-3">
-            <input type="date" x-model="corrDate" class="sinp w-auto">
-            <button @click="loadCorrelation()" class="text-xs px-3 py-1 rounded bg-acc/10 text-acc hover:bg-acc/20 border border-acc/20">查询</button>
-          </div>
+          <!-- 双栏: 日关联 + 个股时间线 -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <div class="text-sm font-medium text-zinc-300 mb-3">新闻-涨跌关联</div>
+              <div class="flex items-center gap-2 mb-3">
+                <input type="date" x-model="corrDate" class="sinp w-auto">
+                <button @click="loadCorrelation()" class="text-xs px-3 py-1 rounded bg-acc/10 text-acc hover:bg-acc/20 border border-acc/20">查询</button>
+              </div>
 
-          <div x-show="corrData.length">
-            <template x-for="r in corrData" :key="r.ts_code">
-              <div class="mb-3 p-3 rounded bg-zinc-900/40 border border-zinc-800/30">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="mono text-xs text-zinc-300 font-medium cursor-pointer hover:text-acc"
-                        @click="selectStock(r.ts_code); view='stock'"
-                        x-text="r.ts_code + ' ' + (name(r.ts_code))"></span>
-                  <span class="mono text-xs" :class="(r.change_pct||0) >= 0 ? 'text-rise' : 'text-fall'"
-                        x-text="r.change_pct ? (r.change_pct >= 0 ? '+' : '') + r.change_pct.toFixed(2) + '%' : '—'"></span>
-                </div>
-                <div class="flex gap-2 text-[10px] text-zinc-600 mb-1">
-                  <span><span x-text="r.news_count"></span> 篇</span>
-                  <span :class="r.avg_sentiment > 0.3 ? 'text-rise/70' : r.avg_sentiment < -0.3 ? 'text-fall/70' : ''">
-                    <span x-text="sentimentLabel(r.avg_sentiment)"></span> <span x-text="r.avg_sentiment >= 0 ? '+' : ''"></span><span x-text="r.avg_sentiment.toFixed(2)"></span>
-                  </span>
-                  <span x-show="r.vol">量 <span x-text="(r.vol/10000).toFixed(0)"></span>万</span>
-                </div>
-                <div x-show="r.news.length">
-                  <template x-for="n in r.news.slice(0, 5)" :key="n.title">
-                    <div class="text-[11px] text-zinc-400 leading-relaxed truncate hover:text-zinc-200 cursor-pointer"
-                         @click="selectedStock=r.ts_code; view='stock'; loadStockNews()">
-                      <span class="text-[10px] font-mono mr-1"
-                            :class="n.sentiment > 0 ? 'text-rise/60' : n.sentiment < 0 ? 'text-fall/60' : 'text-zinc-600'"
-                            x-text="n.sentiment > 0 ? '▲' : n.sentiment < 0 ? '▼' : '▬'"></span>
-                      <span x-text="n.title"></span>
+              <div x-show="corrData.length" class="space-y-2">
+                <template x-for="r in corrData" :key="r.ts_code">
+                  <div class="p-3 rounded bg-zinc-900/40 border border-zinc-800/30">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="mono text-xs text-zinc-300 font-medium cursor-pointer hover:text-acc"
+                            @click="selectStock(r.ts_code); view='stock'"
+                            x-text="r.ts_code + ' ' + (name(r.ts_code))"></span>
+                      <span class="mono text-xs" :class="(r.change_pct||0) >= 0 ? 'text-rise' : 'text-fall'"
+                            x-text="r.change_pct ? (r.change_pct >= 0 ? '+' : '') + r.change_pct.toFixed(2) + '%' : '—'"></span>
+                    </div>
+                    <div class="flex gap-2 text-[10px] text-zinc-600 mb-1">
+                      <span><span x-text="r.news_count"></span> 篇</span>
+                      <span :class="r.avg_sentiment > 0.3 ? 'text-rise/70' : r.avg_sentiment < -0.3 ? 'text-fall/70' : ''">
+                        <span x-text="sentimentLabel(r.avg_sentiment)"></span> <span x-text="r.avg_sentiment >= 0 ? '+' : ''"></span><span x-text="r.avg_sentiment.toFixed(2)"></span>
+                      </span>
+                      <span x-show="r.vol">量 <span x-text="(r.vol/10000).toFixed(0)"></span>万</span>
+                    </div>
+                    <div x-show="r.news.length">
+                      <template x-for="n in r.news.slice(0, 4)" :key="n.title">
+                        <div class="text-[11px] text-zinc-400 leading-relaxed truncate hover:text-zinc-200 cursor-pointer"
+                             @click="selectedStock=r.ts_code; view='stock'; loadStockNews()">
+                          <span class="text-[10px] font-mono mr-1"
+                                :class="n.sentiment > 0 ? 'text-rise/60' : n.sentiment < 0 ? 'text-fall/60' : 'text-zinc-600'"
+                                x-text="n.sentiment > 0 ? '▲' : n.sentiment < 0 ? '▼' : '▬'"></span>
+                          <span x-text="n.title"></span>
+                        </div>
+                      </template>
+                      <div x-show="r.news.length > 4" class="text-[10px] text-zinc-600 mt-0.5 cursor-pointer hover:text-acc"
+                           @click="selectedStock=r.ts_code; view='stock'; loadStockNews()">……全部 <span x-text="r.news.length"></span> 篇 →</div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+              <div x-show="corrDate && !corrData.length" class="text-xs text-zinc-600 py-4 text-center">该日无数据</div>
+            </div>
+
+            <div>
+              <div class="text-sm font-medium text-zinc-300 mb-3">个股情感时间线</div>
+              <div class="flex items-center gap-2 mb-3">
+                <select x-model="corrStock" @change="loadStockCorr()" class="sinp w-auto">
+                  <option value="">选择股票</option>
+                  <template x-for="s in stocks" :key="s"><option :value="s" x-text="s + ' ' + (name(s))"></option></template>
+                </select>
+                <select x-model="corrDays" @change="loadStockCorr()" class="sinp w-auto">
+                  <option value="10">10天</option><option value="30" selected>30天</option><option value="60">60天</option>
+                </select>
+              </div>
+              <div x-show="corrStock">
+                <div x-show="corrTimeline.length" class="space-y-1 max-h-[500px] overflow-y-auto">
+                  <template x-for="d in corrTimeline" :key="d.trade_date">
+                    <div class="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-zinc-900/40 text-xs">
+                      <span class="mono text-zinc-500 w-20 shrink-0" x-text="d.trade_date"></span>
+                      <span class="mono w-14 text-right" :class="(d.change_pct||0) >= 0 ? 'text-rise' : 'text-fall'"
+                            x-text="d.change_pct ? (d.change_pct >= 0 ? '+' : '') + d.change_pct.toFixed(1) + '%' : '—'"></span>
+                      <div class="flex-1 h-2 rounded bg-zinc-800 relative overflow-hidden">
+                        <div class="h-full rounded" :style="'width:' + Math.min(Math.abs(d.avg_sentiment||0)*50, 100) + '%'"
+                             :class="(d.avg_sentiment||0) >= 0 ? 'bg-rise/50 ml-auto' : 'bg-fall/50'"></div>
+                      </div>
+                      <span class="mono text-zinc-600 w-8 text-right" x-text="d.news_count"></span>
+                      <span class="text-zinc-600 w-12 text-right text-[10px]" x-show="d.vol" x-text="(d.vol/10000).toFixed(0)+'万'"></span>
                     </div>
                   </template>
-                  <div x-show="r.news.length > 5" class="text-[10px] text-zinc-600 mt-0.5 cursor-pointer hover:text-acc"
-                       @click="selectedStock=r.ts_code; view='stock'; loadStockNews()">……全部 <span x-text="r.news.length"></span> 篇 →</div>
                 </div>
+                <div x-show="!corrTimeline.length" class="text-xs text-zinc-600 py-4 text-center">加载中或暂无数据</div>
               </div>
-            </template>
-          </div>
-          <div x-show="corrDate && !corrData.length" class="text-xs text-zinc-600 py-4 text-center">该日无数据</div>
-
-          <!-- Stock correlation -->
-          <div class="text-sm font-medium text-zinc-300 mb-3 mt-6">个股情感时间线</div>
-          <div class="flex items-center gap-2 mb-3">
-            <select x-model="corrStock" @change="loadStockCorr()" class="sinp w-auto">
-              <option value="">选择股票</option>
-              <template x-for="s in stocks" :key="s"><option :value="s" x-text="s"></option></template>
-            </select>
-            <select x-model="corrDays" @change="loadStockCorr()" class="sinp w-auto">
-              <option value="10">10天</option><option value="30" selected>30天</option><option value="60">60天</option>
-            </select>
-          </div>
-          <div x-show="corrStock">
-            <div x-show="corrTimeline.length" class="space-y-1">
-              <template x-for="d in corrTimeline" :key="d.trade_date">
-                <div class="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-zinc-900/40 text-xs">
-                  <span class="mono text-zinc-500 w-20 shrink-0" x-text="d.trade_date"></span>
-                  <span class="mono w-14 text-right" :class="(d.change_pct||0) >= 0 ? 'text-rise' : 'text-fall'"
-                        x-text="d.change_pct ? (d.change_pct >= 0 ? '+' : '') + d.change_pct.toFixed(1) + '%' : '—'"></span>
-                  <div class="flex-1 h-2 rounded bg-zinc-800 relative overflow-hidden">
-                    <div class="h-full rounded" :style="'width:' + Math.min(Math.abs(d.avg_sentiment||0)*50, 100) + '%'"
-                         :class="(d.avg_sentiment||0) >= 0 ? 'bg-rise/50 ml-auto' : 'bg-fall/50'"></div>
-                  </div>
-                  <span class="mono text-zinc-600 w-8 text-right" x-text="d.news_count"></span>
-                  <span class="text-zinc-600 w-12 text-right text-[10px]" x-show="d.vol" x-text="(d.vol/10000).toFixed(0)+'万'"></span>
-                </div>
-              </template>
             </div>
-            <div x-show="!corrTimeline.length" class="text-xs text-zinc-600 py-4 text-center">加载中或暂无数据</div>
           </div>
         </div>
       </template>
