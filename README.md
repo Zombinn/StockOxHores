@@ -108,7 +108,8 @@ GET /api/analysis/stock/300750.SZ?days=30
 ## 前端
 
 ```bash
-python3 serve.py          # http://127.0.0.1:8766
+python3 serve.py                       # http://0.0.0.0:8767 (局域网可访问)
+python3 serve.py --port 8766           # 指定端口
 ```
 
 | Tab | 内容 |
@@ -117,7 +118,7 @@ python3 serve.py          # http://127.0.0.1:8766
 | 标的 | 选中标的的全部新闻时间线 |
 | 新闻 | 全局搜索（关键词/日期/标的过滤） |
 | 宏观 | 政策/宏观快讯时间线 |
-| 分析 | 情感总览 + 新闻-涨跌关联 + 个股情感时间线 |
+| 分析 | 情感总览 + 新闻-涨跌-成交量关联 + 个股三围时间线 |
 | 日志 | 采集运行日志 |
 
 ## 数据流
@@ -151,11 +152,3 @@ python3 serve.py          # http://127.0.0.1:8766
 - [ ] 历史模式识别（类似事件检索）
 - [ ] 趋势预测（基于历史信号）
 - [ ] 与 StockWatcher 数据互通
-
-## 设计
-
-基于 [design-taste-frontend](https://github.com) 反AI默认设计理念。
-- 深色 Terminal 风，单强调色 cyan
-- 信息密度优先（DENSITY=7）
-- 时间线式信息流阅读
-- 无 emoji、无 AI 紫色渐变
