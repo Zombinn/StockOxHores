@@ -19,6 +19,21 @@ stocks:
   - "SNDK"        # SanDisk
   - "AAPL"        # Apple
 
+# 股票名称映射
+stock_names:
+  300750.SZ: "宁德时代"
+  300308.SZ: "中际旭创"
+  301308.SZ: "江波龙"
+  002028.SZ: "思源电气"
+  002409.SZ: "雅克科技"
+  600519.SH: "贵州茅台"
+  NVDA: "NVIDIA"
+  TSLA: "Tesla"
+  SPCX: "S&P 500 ETF"
+  MU: "Micron"
+  SNDK: "SanDisk"
+  AAPL: "Apple"
+
 scraper:
   request_delay: 2.0
   max_retries: 3

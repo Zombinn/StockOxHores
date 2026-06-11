@@ -46,6 +46,11 @@ def get_stocks() -> List[str]:
     """读取并标准化配置中的股票列表"""
     return [normalize_code(s) for s in CONFIG["stocks"]]
 
+
+def get_stock_names() -> dict:
+    """读取股票名称映射"""
+    return CONFIG.get("stock_names", {})
+
 # 项目根目录
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 

@@ -57,6 +57,12 @@ async def get_stocks():
     return [r[0] for r in rows] if rows else get_stocks()
 
 
+@app.get("/api/stocks/names")
+async def get_stock_names_api():
+    from db import get_stock_names
+    return get_stock_names()
+
+
 # ─── API: 看板 ───
 
 @app.get("/api/dashboard/top")
