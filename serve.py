@@ -281,6 +281,42 @@ async def get_stock_analysis(ts_code: str, days: int = Query(30, alias="days")):
     return stock_correlation(ts_code, days=days)
 
 
+# ─── API: 任务管理 ───
+
+import subprocess
+import json as json_mod
+
+HERMES = "/Users/zombin/.hermes/hermes-agent/venv/bin/hermes"
+
+
+def _hermes_cron(args: list) -> dict:
+    try:
+        r = subprocess.run([HERMES, "cron"] + args, capture_output=True, text=True, timeout=15)
+        return {"ok": r.returncode == 0, "output": r.stdout, "error": r.stderr}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.get("/api/cron")
+async def list_cron():
+    return _hermes_cron(["list"])
+
+
+@app.post("/api/cron/{job_id}/run")
+async def run_cron(job_id: str):
+    return _hermes_cron(["run", job_id])
+
+
+@app.post("/api/cron/{job_id}/pause")
+async def pause_cron(job_id: str):
+    return _hermes_cron(["pause", job_id])
+
+
+@app.post("/api/cron/{job_id}/resume")
+async def resume_cron(job_id: str):
+    return _hermes_cron(["resume", job_id])
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="StockOxHores Server")
     parser.add_argument("--port", type=int, default=8767, help="监听端口（默认 8767）")

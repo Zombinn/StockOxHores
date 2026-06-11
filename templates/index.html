@@ -368,6 +368,40 @@ tailwind.config = {
         </div>
       </template>
 
+      <!-- ===== 任务 TASKS ===== -->
+      <template x-if="view === 'tasks'">
+        <div class="max-w-3xl">
+          <div class="text-sm font-medium text-zinc-300 mb-4">定时任务</div>
+
+          <template x-for="job in cronJobs" :key="job.job_id">
+            <div class="mb-4 p-4 rounded bg-zinc-900/40 border border-zinc-800/30">
+              <div class="flex items-center justify-between mb-2">
+                <div>
+                  <span class="text-sm text-zinc-200 font-medium" x-text="job.name"></span>
+                  <span class="ml-2 text-[10px] px-2 py-0.5 rounded-full"
+                        :class="job.state === 'scheduled' ? 'bg-rise/10 text-rise/80' : job.state === 'paused' ? 'bg-fall/10 text-fall/80' : 'bg-zinc-800 text-zinc-500'"
+                        x-text="job.state"></span>
+                </div>
+                <div class="flex gap-1">
+                  <button @click="cronRun(job.job_id)" class="text-[10px] px-2 py-1 rounded bg-acc/10 text-acc hover:bg-acc/20 border border-acc/20">执行</button>
+                  <button x-show="job.state === 'scheduled'" @click="cronPause(job.job_id)" class="text-[10px] px-2 py-1 rounded bg-zinc-800 text-zinc-400 hover:bg-zinc-700 border border-zinc-700">暂停</button>
+                  <button x-show="job.state === 'paused'" @click="cronResume(job.job_id)" class="text-[10px] px-2 py-1 rounded bg-rise/10 text-rise/80 hover:bg-rise/20 border border-rise/20">恢复</button>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-[11px] text-zinc-500">
+                <div><span class="text-zinc-600">周期:</span> <span class="mono" x-text="job.schedule || '—'"></span></div>
+                <div><span class="text-zinc-600">重复:</span> <span x-text="job.repeat || '—'"></span></div>
+                <div><span class="text-zinc-600">下次执行:</span> <span class="mono" x-text="job.next_run_at ? new Date(job.next_run_at).toLocaleString('zh-CN') : '—'"></span></div>
+                <div><span class="text-zinc-600">上次状态:</span>
+                  <span :class="job.last_status === 'success' ? 'text-rise' : job.last_status === 'error' ? 'text-fall' : ''" x-text="job.last_status || '—'"></span>
+                </div>
+              </div>
+            </div>
+          </template>
+          <div x-show="!cronJobs.length" class="text-xs text-zinc-600 py-8 text-center">暂无定时任务</div>
+        </div>
+      </template>
+
     </div><!-- /content -->
 
     <!-- Floating bar -->
@@ -398,6 +432,7 @@ function app() {
     newsQuery: '', newsDate: '', newsCode: '',
     macroList: [], macroDate: '',
     logList: [],
+    cronJobs: [],
     sentiment: {}, corrData: [], corrTimeline: [],
     corrDate: new Date().toISOString().slice(0,10), corrStock: '', corrDays: '30',
     dbStatus: '···',
@@ -408,6 +443,7 @@ function app() {
       { id: 'news',  label: '新闻' },
       { id: 'macro', label: '宏观' },
       { id: 'analysis',  label: '分析' },
+      { id: 'tasks',  label: '任务' },
       { id: 'logs',  label: '日志' },
     ],
 
@@ -500,6 +536,8 @@ function app() {
         if (d) this.logList = d;
       } else if (this.view === 'analysis') {
         await this.loadAnalysis();
+      } else if (this.view === 'tasks') {
+        await this.loadCron();
       }
     },
 
@@ -519,6 +557,26 @@ function app() {
       if (s < -0.5) return '偏负面';
       if (s < -0.1) return '微负面';
       return '中性';
+    },
+
+    async loadCron() {
+      const d = await this.api('/api/cron');
+      if (d && d.ok) {
+        try { this.cronJobs = JSON.parse(d.output).jobs || []; }
+        catch(e) { this.cronJobs = []; }
+      }
+    },
+    async cronRun(id) {
+      await this.api(`/api/cron/${id}/run`);
+      await this.loadCron();
+    },
+    async cronPause(id) {
+      await this.api(`/api/cron/${id}/pause`);
+      await this.loadCron();
+    },
+    async cronResume(id) {
+      await this.api(`/api/cron/${id}/resume`);
+      await this.loadCron();
     },
 
     async loadAnalysis() {
