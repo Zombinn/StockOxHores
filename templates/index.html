@@ -300,26 +300,31 @@ tailwind.config = {
             <template x-for="r in corrData" :key="r.ts_code">
               <div class="mb-3 p-3 rounded bg-zinc-900/40 border border-zinc-800/30">
                 <div class="flex items-center justify-between mb-1">
-                  <span class="mono text-xs text-zinc-300 font-medium" x-text="r.ts_code + ' ' + (name(r.ts_code))"></span>
+                  <span class="mono text-xs text-zinc-300 font-medium cursor-pointer hover:text-acc"
+                        @click="selectStock(r.ts_code); view='stock'"
+                        x-text="r.ts_code + ' ' + (name(r.ts_code))"></span>
                   <span class="mono text-xs" :class="(r.change_pct||0) >= 0 ? 'text-rise' : 'text-fall'"
                         x-text="r.change_pct ? (r.change_pct >= 0 ? '+' : '') + r.change_pct.toFixed(2) + '%' : '—'"></span>
                 </div>
                 <div class="flex gap-2 text-[10px] text-zinc-600 mb-1">
                   <span><span x-text="r.news_count"></span> 篇</span>
                   <span :class="r.avg_sentiment > 0.3 ? 'text-rise/70' : r.avg_sentiment < -0.3 ? 'text-fall/70' : ''">
-                    情感 <span x-text="r.avg_sentiment >= 0 ? '+' : ''"></span><span x-text="r.avg_sentiment.toFixed(2)"></span>
+                    <span x-text="sentimentLabel(r.avg_sentiment)"></span> <span x-text="r.avg_sentiment >= 0 ? '+' : ''"></span><span x-text="r.avg_sentiment.toFixed(2)"></span>
                   </span>
                   <span x-show="r.vol">量 <span x-text="(r.vol/10000).toFixed(0)"></span>万</span>
                 </div>
                 <div x-show="r.news.length">
-                  <template x-for="n in r.news.slice(0, 3)" :key="n.title">
-                    <div class="text-[11px] text-zinc-500 leading-relaxed truncate">
-                      <span class="text-[10px]" :class="n.sentiment > 0 ? 'text-rise/60' : n.sentiment < 0 ? 'text-fall/60' : 'text-zinc-600'"
-                            x-text="n.sentiment > 0 ? '👍' : n.sentiment < 0 ? '👎' : '➖'"></span>
+                  <template x-for="n in r.news.slice(0, 5)" :key="n.title">
+                    <div class="text-[11px] text-zinc-400 leading-relaxed truncate hover:text-zinc-200 cursor-pointer"
+                         @click="selectedStock=r.ts_code; view='stock'; loadStockNews()">
+                      <span class="text-[10px] font-mono mr-1"
+                            :class="n.sentiment > 0 ? 'text-rise/60' : n.sentiment < 0 ? 'text-fall/60' : 'text-zinc-600'"
+                            x-text="n.sentiment > 0 ? '▲' : n.sentiment < 0 ? '▼' : '▬'"></span>
                       <span x-text="n.title"></span>
                     </div>
                   </template>
-                  <div x-show="r.news.length > 3" class="text-[10px] text-zinc-600 mt-0.5">……还有 <span x-text="r.news.length - 3"></span> 篇</div>
+                  <div x-show="r.news.length > 5" class="text-[10px] text-zinc-600 mt-0.5 cursor-pointer hover:text-acc"
+                       @click="selectedStock=r.ts_code; view='stock'; loadStockNews()">……全部 <span x-text="r.news.length"></span> 篇 →</div>
                 </div>
               </div>
             </template>
@@ -502,6 +507,14 @@ function app() {
     filterStocks() {},
 
     name(code) { return this.names[code] || code; },
+
+    sentimentLabel(s) {
+      if (s > 0.5) return '偏正面';
+      if (s > 0.1) return '微正面';
+      if (s < -0.5) return '偏负面';
+      if (s < -0.1) return '微负面';
+      return '中性';
+    },
 
     async loadAnalysis() {
       const sent = await this.api('/api/analysis/sentiment-summary?days=30');
