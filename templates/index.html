@@ -409,7 +409,9 @@ tailwind.config = {
                 <div><span class="text-zinc-600">上次状态:</span>
                   <span :class="job.last_status === 'success' ? 'text-rise' : job.last_status === 'error' ? 'text-fall' : ''" x-text="job.last_status || '—'"></span>
                 </div>
+                <div x-show="job.last_run_at"><span class="text-zinc-600">上次执行:</span> <span class="mono" x-text="new Date(job.last_run_at).toLocaleString('zh-CN')"></span></div>
               </div>
+              <div x-show="job.last_error" class="mt-2 text-[10px] text-fall/70 bg-fall/5 rounded p-2 font-mono leading-relaxed break-all" x-text="job.last_error"></div>
             </div>
           </template>
           <div x-show="!cronJobs.length" class="text-xs text-zinc-600 py-8 text-center">暂无定时任务</div>
