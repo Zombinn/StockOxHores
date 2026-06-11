@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stock Watcher HTTP Server
+"""StockOxHores HTTP Server
 
 启动:
   python serve.py              # 开发模式, http://localhost:8765
@@ -19,7 +19,7 @@ from fastapi.responses import HTMLResponse
 from db import get_conn, CONFIG, get_stocks
 
 logger = logging.getLogger("stock-watcher.server")
-app = FastAPI(title="Stock Watcher")
+app = FastAPI(title="StockOxHores")
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 
@@ -131,7 +131,6 @@ async def get_stock_news(ts_code: str, limit: int = Query(30, alias="limit")):
     ).fetchall()
     return [
         {
-            "id": r[5],
             "ts_code": ts_code,
             "news_date": str(r[0]),
             "news_time": str(r[1])[:19] if r[1] else None,
@@ -165,7 +164,7 @@ async def get_news(
 
     where = " AND ".join(conditions) if conditions else "1=1"
     rows = conn.execute(
-        f"""SELECT ts_code, news_date, news_time, source, title, url, id
+        f"""SELECT ts_code, news_date, news_time, source, title, url
             FROM stock_news
             WHERE {where}
             ORDER BY news_date DESC, news_time DESC NULLS LAST
@@ -180,7 +179,6 @@ async def get_news(
         if q and q.lower() not in title.lower():
             continue
         results.append({
-            "id": r[6],
             "ts_code": r[0],
             "news_date": str(r[1]),
             "news_time": str(r[2])[:19] if r[2] else None,
@@ -201,7 +199,7 @@ async def get_macro(
     conn = get_conn()
     if date_str:
         rows = conn.execute(
-            """SELECT event_date, event_time, category, title, content, importance, id
+            """SELECT event_date, event_time, category, title, content, importance
                FROM macro_events
                WHERE event_date = ?
                ORDER BY importance DESC, event_time DESC NULLS LAST
@@ -210,7 +208,7 @@ async def get_macro(
         ).fetchall()
     else:
         rows = conn.execute(
-            """SELECT event_date, event_time, category, title, content, importance, id
+            """SELECT event_date, event_time, category, title, content, importance
                FROM macro_events
                ORDER BY event_date DESC, importance DESC
                LIMIT ?""",
@@ -219,7 +217,7 @@ async def get_macro(
 
     return [
         {
-            "id": r[6],
+            
             "event_date": str(r[0]),
             "event_time": str(r[1])[:19] if r[1] else None,
             "category": r[2],
@@ -278,9 +276,9 @@ async def get_stock_analysis(ts_code: str, days: int = Query(30, alias="days")):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Stock Watcher Server")
-    parser.add_argument("--port", type=int, default=8766, help="监听端口（默认 8766）")
-    parser.add_argument("--host", type=str, default="127.0.0.1", help="监听地址（默认 127.0.0.1）")
+    parser = argparse.ArgumentParser(description="StockOxHores Server")
+    parser.add_argument("--port", type=int, default=8767, help="监听端口（默认 8767）")
+    parser.add_argument("--host", type=str, default="0.0.0.0", help="监听地址（默认 127.0.0.1）")
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -290,7 +288,7 @@ if __name__ == "__main__":
     )
 
     print(f"  ┌────────────────────────────────────┐")
-    print(f"  │  📈 Stock Watcher                  │")
+    print(f"  │  📈 StockOxHores                  │")
     print(f"  │  http://{args.host}:{args.port}                │")
     print(f"  └────────────────────────────────────┘")
 

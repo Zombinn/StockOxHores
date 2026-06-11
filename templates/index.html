@@ -307,6 +307,7 @@ tailwind.config = {
                   <span :class="r.avg_sentiment > 0.3 ? 'text-rise/70' : r.avg_sentiment < -0.3 ? 'text-fall/70' : ''">
                     情感 <span x-text="r.avg_sentiment >= 0 ? '+' : ''"></span><span x-text="r.avg_sentiment.toFixed(2)"></span>
                   </span>
+                  <span x-show="r.vol">量 <span x-text="(r.vol/10000).toFixed(0)"></span>万</span>
                 </div>
                 <div x-show="r.news.length">
                   <template x-for="n in r.news.slice(0, 3)" :key="n.title">
@@ -346,7 +347,7 @@ tailwind.config = {
                          :class="(d.avg_sentiment||0) >= 0 ? 'bg-rise/50 ml-auto' : 'bg-fall/50'"></div>
                   </div>
                   <span class="mono text-zinc-600 w-8 text-right" x-text="d.news_count"></span>
-                  <span class="text-zinc-600 w-6 text-right" x-text="d.news_count + '篇'"></span>
+                  <span class="text-zinc-600 w-12 text-right text-[10px]" x-show="d.vol" x-text="(d.vol/10000).toFixed(0)+'万'"></span>
                 </div>
               </template>
             </div>
