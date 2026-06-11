@@ -346,7 +346,17 @@ async def list_cron():
 
 @app.get("/api/cron/{job_id}/run")
 async def run_cron(job_id: str):
-    return _hermes_cron(["run", job_id])
+    # 直接执行，不走 cron 排队
+    import subprocess
+    try:
+        r = subprocess.run(
+            ["/opt/homebrew/bin/python3.12", "daily.py"],
+            cwd="/Users/zombin/Public/yubin_boxes/shit_mountain/StockOxHores",
+            capture_output=True, text=True, timeout=300
+        )
+        return {"ok": r.returncode == 0, "output": r.stdout, "error": r.stderr}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
 
 
 @app.get("/api/cron/{job_id}/pause")
