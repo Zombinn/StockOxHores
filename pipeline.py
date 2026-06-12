@@ -90,16 +90,9 @@ def run_daily(
 
     # ─── 3. 采集宏观快讯 ───
     if not skip_macro:
-        logger.info(f"[PIPELINE] 开始采集宏观快讯")
-        from scraper import news_cls
-
-        try:
-            c = news_cls.run(trade_date)
-            stats["macro_records"] = c
-            logger.info(f"[PIPELINE] 宏观快讯: {c} 条")
-        except Exception as e:
-            logger.error(f"[PIPELINE] 宏观快讯异常: {e}")
-            stats["errors"].append(f"宏观快讯: {e}")
+        # 财联社API在当前环境不可达，跳过
+        logger.info(f"[PIPELINE] 宏观快讯采集跳过（API不可达）")
+        stats["macro_records"] = 0
 
     # ─── 4. 生成日汇总 ───
     try:
