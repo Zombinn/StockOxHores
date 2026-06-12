@@ -1,34 +1,45 @@
 """Telegram 推送通知模块"""
+import os
 import requests
 
-BOT_TOKEN = "8727873270:AAFygq8rPNAY5mo7shTX_1YCsqGeEFEftRY"
+# 从 .env 加载 token
+_token = os.getenv("TELEGRAM_TOKEN")
+if not _token:
+    try:
+        from pathlib import Path
+        env_file = Path(__file__).parent / ".env"
+        for line in env_file.read_text().split("\n"):
+            if line.startswith("TELEGRAM_TOKEN="):
+                _token = line.split("=", 1)[1].strip()
+    except:
+        pass
+BOT_TOKEN = _token or ""
+
+# chat_id 从 .env 持久化读取
+_chat_id = os.getenv("TELEGRAM_CHAT_ID")
+if not _chat_id:
+    try:
+        from pathlib import Path
+        env_file = Path(__file__).parent / ".env"
+        for line in env_file.read_text().split("\n"):
+            if line.startswith("TELEGRAM_CHAT_ID="):
+                _chat_id = line.split("=", 1)[1].strip()
+    except:
+        pass
+CHAT_ID = _chat_id or ""
+
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
 
-def get_updates():
-    """获取最近的对话，找到 chat_id"""
-    try:
-        r = requests.get(f"{BASE_URL}/getUpdates", timeout=10)
-        data = r.json()
-        chats = set()
-        for update in data.get("result", []):
-            msg = update.get("message", {})
-            chat = msg.get("chat", {})
-            chat_id = chat.get("id")
-            chat_name = chat.get("first_name") or chat.get("title") or str(chat_id)
-            chats.add((chat_id, chat_name))
-        return list(chats)
-    except Exception:
-        return []
-
-
-def send_message(chat_id, text, parse_mode="Markdown"):
-    """发送消息到指定 chat_id"""
+def send_message(text, parse_mode="Markdown"):
+    """发送消息到持久化的 chat_id"""
+    if not CHAT_ID:
+        return False
     try:
         r = requests.post(
             f"{BASE_URL}/sendMessage",
             json={
-                "chat_id": chat_id,
+                "chat_id": int(CHAT_ID),
                 "text": text,
                 "parse_mode": parse_mode,
                 "disable_web_page_preview": True,
@@ -40,25 +51,11 @@ def send_message(chat_id, text, parse_mode="Markdown"):
         return False
 
 
-def send_telegram(text: str):
-    """发送消息到所有已知的 Telegram 对话"""
-    chats = get_updates()
-    ok = False
-    for chat_id, _ in chats:
-        if send_message(chat_id, text):
-            ok = True
-    return ok
+def send_telegram(text: str, parse_mode="Markdown"):
+    """发送消息"""
+    return send_message(text, parse_mode=parse_mode)
 
 
 if __name__ == "__main__":
-    chats = get_updates()
-    print("已知对话:")
-    for chat_id, name in chats:
-        print(f"  {chat_id}: {name}")
-
-    if chats:
-        chat_id, name = chats[0]
-        ok = send_message(chat_id, "✅ StockOxHores 通知测试成功")
-        print(f"\n发送测试消息到 {name}: {'✅' if ok else '❌'}")
-    else:
-        print("❌ 没有找到对话。请先在 Telegram 上给 bot 发一条消息。")
+    ok = send_message("✅ StockOxHores 通知测试", parse_mode="Markdown")
+    print(f"发送测试: {'✅' if ok else '❌'}")

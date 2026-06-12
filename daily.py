@@ -96,18 +96,35 @@ def main():
     # Telegram 推送
     try:
         from notify import send_telegram
-        text = f"""📡 *StockOxHores 情报简报*
+        text = f"""📡 *StockOxHores · {trade_date}*
 
-日期: `{trade_date}`
-标的: {len(stocks)} 只
+{len(stocks)} 只标的 · {stats['news_records']} 篇新闻 · {stats['price_records']} 行情条
+"""
 
-• 新闻: *{stats['news_records']}* 篇
-• 行情: {stats['price_records']} 条"""
+        # Top 10 新闻（按情感分排序，重要的在前）
+        rows = conn.execute(
+            """SELECT ts_code, title, url, sentiment
+               FROM stock_news WHERE news_date=?
+               ORDER BY ABS(sentiment) DESC, news_time DESC NULLS LAST
+               LIMIT 15""",
+            [str(trade_date)]
+        ).fetchall()
+
+        if rows:
+            text += "\n📰 *重要新闻*\n"
+            for r in rows[:12]:
+                code = r[0]
+                title = r[1][:80]
+                url = r[2] or ""
+                s = r[3] or 0
+                tag = "📈" if s > 0.5 else "📊" if s > 0 else "📉" if s < -0.5 else "➖"
+                link = f"[{title[:50]}]({url})" if url and url.startswith("http") else title[:50]
+                text += f"\n{tag} `{code}` {link}"
 
         if stats.get('errors'):
-            text += f"\n⚠️ 错误: {len(stats['errors'])} 条"
+            text += f"\n\n⚠️ {len(stats['errors'])} 条错误"
 
-        send_telegram(text)
+        send_telegram(text, parse_mode="Markdown")
     except Exception:
         pass
 
