@@ -115,7 +115,7 @@ tailwind.config = {
 
       <!-- ===== 今 TODAY ===== -->
       <template x-if="view === 'today'">
-        <div class="max-w-3xl">
+        <div class="">
           <div class="text-sm font-medium text-zinc-300 mb-4">今日情报 · <span class="mono text-zinc-500" x-text="todayStr"></span></div>
 
           <!-- Stats row -->
@@ -170,7 +170,7 @@ tailwind.config = {
 
       <!-- ===== 标的 STOCK ===== -->
       <template x-if="view === 'stock'">
-        <div class="max-w-3xl">
+        <div class="">
           <div x-show="selectedStock">
             <div class="flex items-center justify-between mb-4">
               <div>
@@ -201,7 +201,7 @@ tailwind.config = {
 
       <!-- ===== 新闻 NEWS ===== -->
       <template x-if="view === 'news'">
-        <div class="max-w-4xl">
+        <div class="">
           <div class="flex items-center gap-2 mb-3 flex-wrap">
             <input type="text" x-model="newsQuery" @input.debounce="loadAllNews()" placeholder="关键词" class="sinp w-40">
             <input type="date" x-model="newsDate" @change="loadAllNews()" class="sinp w-auto">
@@ -232,7 +232,7 @@ tailwind.config = {
 
       <!-- ===== 宏观 MACRO ===== -->
       <template x-if="view === 'macro'">
-        <div class="max-w-3xl">
+        <div class="">
           <div class="flex items-center gap-2 mb-3">
             <input type="date" x-model="macroDate" @change="loadMacro()" class="sinp w-auto">
           </div>
@@ -279,7 +279,7 @@ tailwind.config = {
 
       <!-- ===== 分析 ANALYSIS ===== -->
       <template x-if="view === 'analysis'">
-        <div class="max-w-4xl">
+        <div class="">
           <!-- Sentiment summary -->
           <div class="text-sm font-medium text-zinc-300 mb-3">情感总览</div>
           <div class="grid grid-cols-3 gap-px bg-zinc-800/20 rounded overflow-hidden mb-5">
@@ -370,7 +370,7 @@ tailwind.config = {
 
       <!-- ===== 任务 TASKS ===== -->
       <template x-if="view === 'tasks'">
-        <div class="max-w-3xl">
+        <div class="">
           <div class="text-sm font-medium text-zinc-300 mb-4">定时任务</div>
 
           <template x-for="job in cronJobs" :key="job.job_id">
