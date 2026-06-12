@@ -41,8 +41,12 @@ def main():
     print(f"  StockOxHores · {trade_date}")
     print(f"  {len(stocks)} 只标的")
     print(f"{'='*50}\n")
+    # 2. 采集当日情报
+    stats = run_daily(trade_date, ts_codes=stocks, skip_price=args.skip_price)
 
-    stats = run_daily(stocks, trade_date=trade_date, skip_price=args.skip_price)
+    # 3. 情感评分（新入库的新闻自动打分）
+    from analysis.sentiment import batch_score
+    batch_score()
 
     print(f"\n{'='*50}")
     print(f"  采集完成")
