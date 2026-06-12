@@ -93,6 +93,24 @@ def main():
     )
     conn.commit()
 
+    # Telegram 推送
+    try:
+        from notify import send_telegram
+        text = f"""📡 *StockOxHores 情报简报*
+
+日期: `{trade_date}`
+标的: {len(stocks)} 只
+
+• 新闻: *{stats['news_records']}* 篇
+• 行情: {stats['price_records']} 条"""
+
+        if stats.get('errors'):
+            text += f"\n⚠️ 错误: {len(stats['errors'])} 条"
+
+        send_telegram(text)
+    except Exception:
+        pass
+
 
 if __name__ == "__main__":
     main()
