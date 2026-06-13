@@ -11,9 +11,9 @@ stocks:
   - "301308"      # 江波龙
   - "002028"      # 思源电气
   - "002409"      # 雅克科技
-  - "SH600519"    # 贵州茅台
   - "NVDA"        # NVIDIA
   - "TSLA"        # Tesla
+  - "SH600519"    # 贵州茅台
   - "SPCX"        # S&P 500 ETF
   - "MU"          # Micron
   - "SNDK"        # SanDisk
