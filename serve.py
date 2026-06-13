@@ -33,7 +33,7 @@ async def index():
 
 @app.get("/api/stats")
 async def get_stats():
-    conn = get_conn()
+    conn = get_conn(read_only=True)
     stocks = conn.execute("SELECT COUNT(DISTINCT ts_code) FROM stock_daily").fetchone()[0]
     price = conn.execute("SELECT COUNT(*) FROM stock_daily").fetchone()[0]
     news = conn.execute("SELECT COUNT(*) FROM stock_news").fetchone()[0]
@@ -50,7 +50,7 @@ async def get_stats():
 
 @app.get("/api/stocks")
 async def get_stocks():
-    conn = get_conn()
+    conn = get_conn(read_only=True)
     rows = conn.execute(
         "SELECT DISTINCT ts_code FROM stock_daily ORDER BY ts_code"
     ).fetchall()
@@ -67,7 +67,7 @@ async def get_stock_names_api():
 
 @app.get("/api/dashboard/top")
 async def get_top_movers(date_str: Optional[str] = Query(None, alias="date")):
-    conn = get_conn()
+    conn = get_conn(read_only=True)
     trade_date = date_str or str(date.today())
     rows = conn.execute(
         """SELECT ts_code, close, change_pct, vol
@@ -86,7 +86,7 @@ async def get_top_movers(date_str: Optional[str] = Query(None, alias="date")):
 
 @app.get("/api/dashboard/summary")
 async def get_latest_summary():
-    conn = get_conn()
+    conn = get_conn(read_only=True)
     row = conn.execute(
         "SELECT summary FROM daily_summary ORDER BY trade_date DESC LIMIT 1"
     ).fetchone()
@@ -97,7 +97,7 @@ async def get_latest_summary():
 
 @app.get("/api/stock/{ts_code}")
 async def get_stock_detail(ts_code: str, days: int = Query(60, alias="days")):
-    conn = get_conn()
+    conn = get_conn(read_only=True)
     end = date.today()
     start = end - timedelta(days=days)
     rows = conn.execute(
@@ -126,7 +126,7 @@ async def get_stock_detail(ts_code: str, days: int = Query(60, alias="days")):
 
 @app.get("/api/stock/{ts_code}/news")
 async def get_stock_news(ts_code: str, limit: int = Query(30, alias="limit")):
-    conn = get_conn()
+    conn = get_conn(read_only=True)
     rows = conn.execute(
         """SELECT news_date, news_time, source, title, url
            FROM stock_news
@@ -157,7 +157,7 @@ async def get_news(
     ts_code: Optional[str] = Query(None, alias="ts_code"),
     limit: int = Query(50, alias="limit"),
 ):
-    conn = get_conn()
+    conn = get_conn(read_only=True)
     conditions = []
     params = []
 
@@ -202,7 +202,7 @@ async def get_macro(
     date_str: Optional[str] = Query(None, alias="date"),
     limit: int = Query(50, alias="limit"),
 ):
-    conn = get_conn()
+    conn = get_conn(read_only=True)
     if date_str:
         rows = conn.execute(
             """SELECT event_date, event_time, category, title, content, importance
@@ -239,7 +239,7 @@ async def get_macro(
 
 @app.get("/api/logs")
 async def get_logs(limit: int = Query(100, alias="limit")):
-    conn = get_conn()
+    conn = get_conn(read_only=True)
     rows = conn.execute(
         """SELECT run_date, module, ts_code, status, records, message, duration_s, created_at
            FROM run_log

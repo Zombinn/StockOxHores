@@ -57,19 +57,16 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # 加载配置
 with open(PROJECT_ROOT / "config.yaml") as f:
     CONFIG = yaml.safe_load(f)
-
+# 数据库路径
 DB_PATH = PROJECT_ROOT / CONFIG["db_path"]
 
-# 连接缓存（单例模式）
-_conn: Optional[duckdb.DuckDBPyConnection] = None
 
-
-def get_conn() -> duckdb.DuckDBPyConnection:
-    """获取数据库连接（单例）"""
-    global _conn
-    if _conn is None:
-        _conn = duckdb.connect(str(DB_PATH))
-    return _conn
+def get_conn(read_only: bool = False) -> duckdb.DuckDBPyConnection:
+    """获取数据库连接"""
+    conn = duckdb.connect(str(DB_PATH), read_only=read_only)
+    if not read_only:
+        conn.execute("SET enable_progress_bar=false")
+    return conn
 
 
 def init_db():
