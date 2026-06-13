@@ -44,12 +44,23 @@ def normalize_code(code: str) -> str:
 
 def get_stocks() -> List[str]:
     """读取并标准化配置中的股票列表"""
-    return [normalize_code(s) for s in CONFIG["stocks"]]
+    try:
+        import yaml
+        cfg = yaml.safe_load((PROJECT_ROOT / "config.yaml").read_text())
+        return [normalize_code(s) for s in cfg.get("stocks", [])]
+    except Exception:
+        return []
 
 
 def get_stock_names() -> dict:
-    """读取股票名称映射"""
-    return CONFIG.get("stock_names", {})
+    """实时读取股票名称映射"""
+    try:
+        from pathlib import Path
+        import yaml
+        cfg = yaml.safe_load((PROJECT_ROOT / "config.yaml").read_text())
+        return cfg.get("stock_names", {})
+    except Exception:
+        return {}
 
 # 项目根目录
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
