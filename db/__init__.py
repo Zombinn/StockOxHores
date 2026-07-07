@@ -87,7 +87,7 @@ def init_db():
     ddl = schema_path.read_text()
     conn.execute(ddl)
     conn.commit()
-    print(f"[DB] 数据库已初始化: {DB_PATH}")
+    # print(f"[DB] 数据库已初始化: {DB_PATH}")
 
 
 def insert_df(df, table: str):

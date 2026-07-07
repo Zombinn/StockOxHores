@@ -1,6 +1,1 @@
-"""爬虫模块"""
-
-from . import price
-from . import news_eastmoney
-from . import news_sina
-from . import news_cls
+"""爬虫模块 — 子模块按需导入，避免 pandas/numpy 依赖链"""
