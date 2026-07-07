@@ -82,16 +82,41 @@ def main():
         [str(trade_date)]
     ).fetchall()
 
-    print(f"\n📋 情报简报  ·  {trade_date}")
-    print(f"{'─'*40}")
-    print(f"  新闻 {news_count} 条 · 宏观 {macro_count} 条")
-    print(f"  有新闻标的: {len(active)} 只")
-    for r in active[:10]:
-        c = conn.execute(
-            "SELECT COUNT(*) FROM stock_news WHERE ts_code=? AND news_date=?",
-            [r[0], str(trade_date)]
-        ).fetchone()[0]
-        print(f"    {r[0]:12s} {c} 篇")
+    if args.quiet:
+        # 简洁格式 — 飞书推送
+        active_codes = [r[0] for r in active]
+        print(f"\n📊 StockOxHores · {trade_date}")
+        print(f"{news_count} 条新闻 · {len(active)} 只标的 · 宏观 {macro_count} 条\n")
+
+        rows = conn.execute(
+            """SELECT ts_code, title, source, url, sentiment
+               FROM stock_news WHERE news_date=?
+               ORDER BY ABS(sentiment) DESC, news_time DESC NULLS LAST
+               LIMIT 15""",
+            [str(trade_date)]
+        ).fetchall()
+        for r in rows:
+            code = r[0][:6].replace(".SZ","").replace(".SH","") if "." in (r[0] or "") else r[0]
+            title = r[1][:80] if r[1] else ""
+            source = r[2] or ""
+            url = r[3] or ""
+            s = r[4] or 0
+            tag = "📈" if s > 0 else "📉" if s < 0 else "➖"
+            if url and url.startswith("http"):
+                print(f"{tag} [{title}]({url})  `{source}`  `{code}`")
+            else:
+                print(f"{tag} {title}  `{source}`  `{code}`")
+    else:
+        print(f"\n📋 情报简报  ·  {trade_date}")
+        print(f"{'─'*40}")
+        print(f"  新闻 {news_count} 条 · 宏观 {macro_count} 条")
+        print(f"  有新闻标的: {len(active)} 只")
+        for r in active[:10]:
+            c = conn.execute(
+                "SELECT COUNT(*) FROM stock_news WHERE ts_code=? AND news_date=?",
+                [r[0], str(trade_date)]
+            ).fetchone()[0]
+            print(f"    {r[0]:12s} {c} 篇")
 
     summary_md = f"""# StockOxHores 情报简报 · {trade_date}
 
