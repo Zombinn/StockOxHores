@@ -27,7 +27,13 @@ def main():
     parser.add_argument("--date", type=str, help="指定日期 YYYY-MM-DD（默认今天）")
     parser.add_argument("--stocks", nargs="+", help="指定股票列表")
     parser.add_argument("--skip-price", action="store_true", help="跳过行情采集")
+    parser.add_argument("--quiet", action="store_true", help="只输出简报，隐藏日志")
     args = parser.parse_args()
+
+    if args.quiet:
+        logging.getLogger().setLevel(logging.ERROR)
+        import os
+        os.environ["LOGURU_LEVEL"] = "ERROR"
 
     from pipeline import run_daily, init_project
     from db import get_stocks, get_conn
@@ -37,10 +43,11 @@ def main():
     trade_date = date.fromisoformat(args.date) if args.date else date.today()
     stocks = args.stocks or get_stocks()
 
-    print(f"\n{'='*50}")
-    print(f"  StockOxHores · {trade_date}")
-    print(f"  {len(stocks)} 只标的")
-    print(f"{'='*50}\n")
+    if not args.quiet:
+        print(f"\n{'='*50}")
+        print(f"  StockOxHores · {trade_date}")
+        print(f"  {len(stocks)} 只标的")
+        print(f"{'='*50}\n")
     # 2. 采集当日情报
     stats = run_daily(ts_codes=stocks, trade_date=trade_date, skip_price=args.skip_price)
 
