@@ -172,7 +172,7 @@ def run_batch(ts_codes: List[str], start_date, end_date=None) -> int:
                 logger.info(f"[价格] {ts_code} 新增 {len(new_df)} 条")
             else:
                 logger.info(f"[价格] {ts_code} 全部已存在，跳过")
-        time.sleep(0.3)
+        time.sleep(5)
 
     logger.info(f"[价格] 批量完成，共新增 {total} 条记录")
     return total
