@@ -85,8 +85,9 @@ def main():
     if args.quiet:
         # 简洁格式 — 飞书推送
         active_codes = [r[0] for r in active]
-        print(f"\n📊 StockOxHores · {trade_date}")
-        print(f"{news_count} 条新闻 · {len(active)} 只标的 · 宏观 {macro_count} 条\n")
+        header = f"📊 StockOxHores · {trade_date}"
+
+        lines = [f"{news_count} 条新闻 · {len(active)} 只标的 · 宏观 {macro_count} 条\n"]
 
         rows = conn.execute(
             """SELECT ts_code, title, source, url, sentiment
@@ -103,9 +104,27 @@ def main():
             s = r[4] or 0
             tag = "📈" if s > 0 else "📉" if s < 0 else "➖"
             if url and url.startswith("http"):
-                print(f"{tag} [{title}]({url})  `{source}`  `{code}`")
+                lines.append(f"{tag} [{title}]({url})  `{source}`  `{code}`")
             else:
-                print(f"{tag} {title}  `{source}`  `{code}`")
+                lines.append(f"{tag} {title}  `{source}`  `{code}`")
+
+        msgs = []
+        chunk = header + "\n" + lines[0]
+        for l in lines[1:]:
+            if len(chunk) + len(l) > 3500:
+                msgs.append(chunk)
+                chunk = l
+            else:
+                chunk += "\n" + l
+        if chunk:
+            msgs.append(chunk)
+
+        try:
+            from notify import send_feishu
+            for m in msgs:
+                send_feishu(m)
+        except Exception:
+            pass
     else:
         print(f"\n📋 情报简报  ·  {trade_date}")
         print(f"{'─'*40}")
