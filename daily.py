@@ -55,16 +55,17 @@ def main():
     from analysis.sentiment import batch_score
     batch_score()
 
-    print(f"\n{'='*50}")
-    print(f"  采集完成")
-    print(f"  新闻: {stats['news_records']} 条")
-    print(f"  宏观: {stats['macro_records']} 条")
-    print(f"  行情: {stats['price_records']} 条（仅用于关联匹配）")
-    if stats['errors']:
-        print(f"  错误: {len(stats['errors'])} 条")
-        for err in stats['errors'][:5]:
-            print(f"    · {err}")
-    print(f"{'='*50}\n")
+    if not args.quiet:
+        print(f"\n{'='*50}")
+        print(f"  采集完成")
+        print(f"  新闻: {stats['news_records']} 条")
+        print(f"  宏观: {stats['macro_records']} 条")
+        print(f"  行情: {stats['price_records']} 条（仅用于关联匹配）")
+        if stats['errors']:
+            print(f"  错误: {len(stats['errors'])} 条")
+            for err in stats['errors'][:5]:
+                print(f"    · {err}")
+        print(f"{'='*50}\n")
 
     # 输出当日情报摘要（结构化 Markdown）
     conn = get_conn()
