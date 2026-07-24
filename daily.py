@@ -89,6 +89,8 @@ def main():
 
         lines = [f"{news_count} 条新闻 · {len(active)} 只标的 · 宏观 {macro_count} 条\n"]
 
+        from db import get_stock_names
+        stock_names = get_stock_names()
         rows = conn.execute(
             """SELECT ts_code, title, source, url, sentiment
                FROM stock_news WHERE news_date=?
@@ -97,16 +99,19 @@ def main():
             [str(trade_date)]
         ).fetchall()
         for r in rows:
-            code = r[0][:6].replace(".SZ","").replace(".SH","") if "." in (r[0] or "") else r[0]
+            raw_code = r[0] or ""
+            code = raw_code[:6].replace(".SZ","").replace(".SH","") if "." in raw_code else raw_code
+            name = stock_names.get(raw_code, code)
+            tag = "📈" if (r[4] or 0) > 0 else "📉" if (r[4] or 0) < 0 else "➖"
             title = r[1][:80] if r[1] else ""
             source = r[2] or ""
             url = r[3] or ""
-            s = r[4] or 0
-            tag = "📈" if s > 0 else "📉" if s < 0 else "➖"
+            # 格式: 📈 代码 名称 | 标题  | 来源
+            label = f"`{code}` {name}"
             if url and url.startswith("http"):
-                lines.append(f"{tag} [{title}]({url})  `{source}`  `{code}`")
+                lines.append(f"{tag} {label} | [{title}]({url})  | {source}")
             else:
-                lines.append(f"{tag} {title}  `{source}`  `{code}`")
+                lines.append(f"{tag} {label} | {title}  | {source}")
 
         msgs = []
         chunk = header + "\n" + lines[0]
